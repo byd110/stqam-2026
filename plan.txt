@@ -14,7 +14,7 @@ _ L08 Dafny
 _ L09 More Dafny, including VC and lemmas
 _ L10 Bubblesort in Dafny
 _ L11 Dafny sequences and VCgen
-_ L12 Bounded model checking
+_ L12 On the impact of formal verification on software development https://ranjitjhala.github.io/static/oopsla25-formal.pdf
 
   Program proof/correct by construction 
 "N things I learned trying to do formal methods in industry" Mike Dodds
@@ -36,7 +36,7 @@ _ L20
   https://www.cse.ust.hk/~scc/publ/CS98-01-metamorphictesting.pdf
 2 weeks bounded model checking (L18)
 
-_ L21 proof harnesses
+_ L21 Bounded model checking/ proof harnesses
 _ L22
 _ L23
 _ L24
