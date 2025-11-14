@@ -5,3 +5,6 @@
 *.blg
 *.out
 *.bbl
+*.nav
+*.snm
+*.toc
