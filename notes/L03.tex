@@ -1,0 +1,328 @@
+\documentclass[11pt]{article}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage[listings]{tcolorbox}
+\usepackage{tikz}
+\usepackage{url}
+
+%\usepackage{algorithm2e}
+\usetikzlibrary{arrows,automata,shapes}
+\tikzstyle{block} = [rectangle, draw, fill=blue!20, 
+    text width=5em, text centered, rounded corners, minimum height=2em]
+\tikzstyle{bt} = [rectangle, draw, fill=blue!20, 
+    text width=4em, text centered, rounded corners, minimum height=2em]
+
+\lstset{ %
+language=Java,
+basicstyle=\ttfamily,commentstyle=\scriptsize\itshape,showstringspaces=false,breaklines=true,numbers=left}
+\newtcbinputlisting{\codelisting}[3][]{
+    extrude left by=1em,
+    extrude right by=2em,
+    listing file={#3},
+    fonttitle=\bfseries,
+    listing options={basicstyle=\ttfamily\footnotesize,numbers=left,language=Java,#1},
+    listing only,
+    hbox,
+}
+\lstdefinelanguage{JavaScript}{
+  keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, 
+do, else, case, break},
+  keywordstyle=\color{blue}\bfseries,
+  ndkeywords={class, export, boolean, throw, implements, import, this},
+  ndkeywordstyle=\color{darkgray}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=false,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{purple}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  morestring=[b]',
+  morestring=[b]''
+}
+
+
+\newtheorem{defn}{Definition}
+\newtheorem{crit}{Criterion}
+
+\newcommand{\handout}[5]{
+  \noindent
+  \begin{center}
+  \framebox{
+    \vbox{
+      \hbox to 5.78in { {\bf Software Testing, Quality Assurance and Maintenance } \hfill #2 }
+      \vspace{4mm}
+      \hbox to 5.78in { {\Large \hfill #5  \hfill} }
+      \vspace{2mm}
+      \hbox to 5.78in { {\em #3 \hfill #4} }
+    }
+  }
+  \end{center}
+  \vspace*{4mm}
+}
+
+\newcommand{\lecture}[4]{\handout{#1}{#2}{#3}{#4}{Lecture #1}}
+\topmargin 0pt
+\advance \topmargin by -\headheight
+\advance \topmargin by -\headsep
+\textheight 8.9in
+\oddsidemargin 0pt
+\evensidemargin \oddsidemargin
+\marginparwidth 0.5in
+\textwidth 6.5in
+
+\parindent 0in
+\parskip 1.5ex
+%\renewcommand{\baselinestretch}{1.25}
+
+\begin{document}
+
+\lecture{3 --- January 12, 2026}{Winter 2026}{Patrick Lam}{version 1}
+
+
+So, in the testing space, we write a bunch of tests and hope it's good
+enough. For most of us, it's never that fun to write tests. But, you
+want to do a good job, so you should write some number of tests. What
+is that number?
+
+\section*{When to stop? Idea 1: Coverage}
+
+If you could test your function or program on every single input (and
+if you had an oracle to tell you if the output was correct---more on that later), then that
+would clearly be enough. But, this doesn't work. Even if your program is
+not timing-sensitive. There are just too many inputs. 
+Exponential growth strikes again.
+
+Short of that, one metric that people use in industry is the notion of
+code coverage. In particular, statement coverage and branch coverage.
+There are other notions of coverage, but they are not widely used and
+I don't think they actually tell you anything useful.
+
+You could evaluate statement coverage and branch coverage based on
+program source code and lines of code. When we talk about the real world, we'll do that. The easiest notation to reason about is an intermediate representation with a control-flow graph, but we don't actually need that in this version of this course. We will assume that each non-blank, non-comment line of code corresponds to one program statement.
+
+\paragraph{Aside: white-box and black-box testing.} I don't think this
+is really a big deal these days, but there is the term \emph{white-box} testing,
+which means that you can look at the source code when you write tests,
+and \emph{black-box} testing, where you can't.
+
+\subsection*{Statement \& Branch Coverage}
+
+I used to give a more formal definition, but it boils down to this.
+You have a test suite and a program. 
+
+Instrument the program to count whether each statement is executed or not.  Also instrument it to count whether each
+branch is taken or not.
+
+\emph{Statement coverage} is the fraction of statements that are
+executed by the test suite. \emph{Branch coverage} is the fraction of
+branches that are executed.
+
+Let's look at an example, which is also available in the \texttt{code/L03} directory of the pdfs
+repository. Here is some code.
+
+\lstinputlisting{code/L03/foo.py}
+
+And here's a test suite.
+
+\lstinputlisting{code/L03/test_suite.py}
+
+The textual report has much of the important information, though the HTML report is easier to navigate:
+
+{\tiny
+\begin{verbatim}
+Name                                                         Stmts   Miss Branch BrPart  Cover   Missing
+--------------------------------------------------------------------------------------------------------
+/usr/lib/python3/dist-packages/_distutils_hack/__init__.py     101     96     38      0     6%   2-101, 111-239
+L03/foo.py                                                      11      2      8      2    79%   4, 11
+L03/test_suite.py                                               12      0      0      0   100%
+--------------------------------------------------------------------------------------------------------
+TOTAL                                                          124     98     46      2    21%
+\end{verbatim}
+}
+
+One can add missing test cases to make sure that all the lines are visited. One can also observe
+that, even with 100\% branch coverage, one is missing an important behaviour: what if \texttt{b} is 0?
+
+\subsection*{Tracking Python Coverage in Python}
+I said ``instrument the program''. Different languages have different support for this. In C, you need to compile the program with instrumentation. In Java, the virtual machine can collect information as the program executes (more useful if there is debug information). Python also provides hooks\footnote{We are following \url{https://www.fuzzingbook.org/html/Coverage.html} here.} so that you can collect information about program execution and implement your own \emph{dynamic program analyses}. 
+
+Specifically, you can use the Python function \texttt{sys.settrace(f)} to register \texttt{f()} as a \emph{tracing function} which gets called once per line executed. It gets passed information about the line which is being executed and the current context (e.g. contents of variables and the call stack.)
+
+Here is an example tracing function, which I've put in the repo at \texttt{code/L03/tracing.py}.
+\begin{lstlisting}[language=Python]
+from types import FrameType, TracebackType
+coverage = []
+
+def traceit(frame: FrameType, event: str, arg: Any) -> Optional[Callable]:
+    """Trace program execution. To be passed to sys.settrace()."""
+    if event == 'line':
+        global coverage
+        function_name = frame.f_code.co_name
+        lineno = frame.f_lineno
+        coverage.append(lineno)
+
+    return traceit
+\end{lstlisting}
+This records the line number and function name to be executed in the global \texttt{coverage} list. More generally, the \texttt{frame} parameter includes information about the function name, line number, and local variables and arguments. The \texttt{event} parameter tells you that Python is about to execute a new \texttt{"line"}, \texttt{"call"}, or perform some other event. Finally, \texttt{arg} gives you additional information about the \texttt{event} when appropriate, e.g. the value being returned for a \texttt{"return"} event.
+
+I've included a function \texttt{cgi\_decode()} from the \emph{Fuzzing Book}
+in \texttt{tracing.py}, and we can use it to test out tracing:
+
+\begin{lstlisting}[language=Python]
+def cgi_decode_traced(s: str) -> None:
+    global coverage
+    coverage = []
+    sys.settrace(traceit)  # Turn on
+    cgi_decode(s)
+    sys.settrace(None)    # Turn off
+\end{lstlisting}
+
+and if we call it and print out the coverage, we get something like:
+\begin{lstlisting}[language=Python]
+>>> cgi_decode_traced("a+b")
+>>> print(coverage)
+[12, 13, 12, 13, 12, 13, 12, 13, 12, 13, 12, 14, 12, 14, 12, 14, 12, 14, 12, 14, 12, 15, 12, 15, 12, 15, 12, 15, 12, 15, 12, 15, 12, 16, 12, 16, 12, 19, 20, 21, 22, 23, 25, 34, 35, 21, 22, 23, 24, 35, 21, 22, 23, 25, 34, 35, 21, 36]
+\end{lstlisting}
+The \emph{Fuzzing Book} continues with using Python introspection to retrieve the source code and pretty-print it again, highlighting which lines have and, importantly, have not been covered. This allows the user to write tests to ensure better statement coverage.
+
+There is one more thing. The \emph{Fuzzing Book} also talks about the usage of \texttt{with} to turn tracing on and off, and storing the result to a specified variable:
+\begin{lstlisting}[language=Python]
+with Coverage() as cov:
+    function_to_be_traced()
+c = cov.coverage()
+\end{lstlisting}
+Here, the \texttt{Coverage} class does a bit more magic to provide the desired functionality, but we won't talk about it. Basically, we can print out either \texttt{cov} (which has a useful pretty-printing function) or the result of its \texttt{coverage()} method, which is a set of method/line pairs.
+
+\subsection*{Infeasible Test Requirements; How Much Coverage, Anyway?}
+
+About ``better statement coverage''. For toy programs, we can reach 100\% statement and branch coverage.
+For real programs, this is still theoretically possible, but becomes
+impractical. 
+
+We'll wrap up our unit on defining test suites by exploring the question
+``How much is enough?'' We'll discuss coverage first and then mutation testing
+as ways of answering this question.
+
+First, we can look at actual test suites and see how much coverage they achieve.
+I collected this data a few years ago, measured with the EclEmma tool.
+
+\begin{center}
+  \includegraphics[height=2in]{L03/coverage.png}
+\end{center}
+
+We can see that the coverage varies between 20\% and 95\% on actual
+open-source projects. I investigated further and found that while Weka has low
+test coverage, it instead uses scientific peer review for QA: its features
+come from published articles. Common practice in industry is that about 80\%
+coverage (doesn't matter which kind) is good enough.
+
+Let's look at a more specific case study, JUnit. The rest of this lecture is
+based on a blog post by Arie van Deursen:
+
+\begin{center}
+  \url{https://avandeursen.com/2012/12/21/line-coverage-lessons-from-junit/}
+\end{center}
+
+Although you might think of JUnit as something that just magically exists in the world,
+it is a software artifact too. JUnit is written by developers who obviously really care
+about testing. Let's see what they do.
+
+Here's the Cobertura report for JUnit:
+
+\begin{center}
+  \includegraphics[height=2in]{L03/cobertura-junit.png}
+\end{center}
+
+\paragraph{Stats.} Overall instruction (statement) coverage for JUnit 4.11 is about 85\%; there are
+13,000 lines of code and 15,000 lines of test code. (It's not that
+unusual for there to be more tests than code.) This is consistent with
+the industry average.
+
+\paragraph{Deprecated code?} Sometimes library authors decide that some functionality
+was not a good idea after all. In that case they might \emph{deprecate} some methods or
+classes, signalling that these APIs will disappear in the future.
+
+In JUnit, deprecated and older code has lower coverage levels. Its 13 deprecated
+classes have only 65\% instruction coverage. Ignoring deprecated code, JUnit achieves
+93\% instruction coverage. Furthermore, newer code in
+package {\tt org.junit.*} has 90\% instruction coverage, while older code in
+{\tt junit.*} has 70\% instruction coverage.
+
+(Why is this? Perhaps the coverage decreased over time for the deprecated code, since
+no one is really maintaining it anymore, and failing test cases just get removed.)
+
+\paragraph{Untested class.} The blog post points out one class that was completely
+untested, which is unusual for JUnit. It turns out that the code came with tests,
+but that the tests never got run because they were never added to any test suites.
+Furthermore, these tests also failed, perhaps because no one had ever tried them.
+The continuous integration infrastructure did not detect this change. (More on CI
+later.)
+
+\paragraph{What else?} Arie van Deursen characterizes the remaining 6\% as
+``the usual suspects''. In JUnit's case, there was no method with more than
+2 to 3 uncovered lines. Here's what he found.
+
+\noindent
+\emph{Too simple to test.} Sometimes it doesn't make sense to test a method, because
+it's not really doing anything. For instance:
+\begin{lstlisting}[language=Java]
+  public static void assumeFalse(boolean b) {
+    assumeTrue(!b);
+  }
+\end{lstlisting}
+or just getters or {\tt toString()} methods (which can still be wrong).
+
+The empty method is also too simple to test; one might write such a method to allow
+it to be overridden in subclasses:
+\begin{lstlisting}[language=Java]
+  /**
+  * Override to set up your specific external resource.
+  *
+  * @throws if setup fails (which will disable {@code after}
+  */
+  protected void before() throws Throwable {
+    // do nothing
+  }
+\end{lstlisting}
+
+\noindent \emph{Dead by design.} Sometimes a method really should never be called,
+for instance a constructor on a class that should never be instantiated:
+\begin{lstlisting}[language=Java]
+  /**
+  * Protect constructor since it is a static only class
+  */
+  protected Assert() { }
+\end{lstlisting}
+
+A related case is code that should never be executed:
+\begin{lstlisting}[language=Java]
+  catch (InitializationError e) {
+    throw new RuntimeException(
+    "Bug in saff's brain: " +
+    "Suite constructor, called as above, should always complete");
+  }
+\end{lstlisting}
+Similarly, switch statements may have unreachable default cases. Or other unreachable code.
+Sometimes the code is just highly unlikely to happen:
+\begin{lstlisting}[language=Java]
+  try {
+    ...
+  } catch (InitializationError e) {
+    return new ErrorReportingRunner(null, e); // uncovered
+  }
+\end{lstlisting}
+
+\paragraph*{Conclusions.} We explored empirically the instruction coverage of JUnit,
+which is written by people who really care about testing. Don't forget
+that coverage doesn't actually guarantee, by itself, that your code is
+well-exercised; what is in the tests matters too. For non-deprecated
+code, they achieved 93\% instruction coverage, and so it really is
+possible to have no more than 2-3 untested lines of code per
+method. It's probably OK to have lower coverage for deprecated
+code. Beware when you are adding a class and check that you are also
+testing it.
+
+
+
+
+\end{document}
