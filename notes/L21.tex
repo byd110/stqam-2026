@@ -75,7 +75,7 @@ basicstyle=\ttfamily,commentstyle=\scriptsize\itshape,showstringspaces=false,bre
 
 \begin{document}
 
-\lecture{11 --- February 9, 2026}{Winter 2026}{Patrick Lam}{version 1}
+\lecture{21 --- March 23, 2026}{Winter 2026}{Patrick Lam}{version 1}
 
 We are still pretty confident in our bubble sort implementation. We did, however, use multisets.
 This is not a correctness issue, but it's good to know how to implement things ourselves.
@@ -297,7 +297,7 @@ hood---earlier we had talked about loops, now we'll talk about normal
 statements. This is called \emph{verification condition
 generation}. Here's a picture, which should not be a surprise.
 
-\includegraphics[width=\textwidth]{L11/vcgen.png}
+\includegraphics[width=\textwidth]{L21/vcgen.png}
 
 \subsection*{Step 1: Loop-Free Guarded Commands}
 For verification purposes, we first compile the program into loop-free guarded commands.
@@ -404,7 +404,7 @@ q \models \mathrm{WP}(c, B) \mathrm{~~~iff~~~} \forall q' \in Q. ~q \xrightarrow
 
 Or, as a picture:
 \begin{center}
-  \includegraphics[width=.6\textwidth]{L11/wp.png}
+  \includegraphics[width=.6\textwidth]{L21/wp.png}
 \end{center}
 It really is backwards, but effective.
 
