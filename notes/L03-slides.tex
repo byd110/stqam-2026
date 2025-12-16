@@ -1,0 +1,439 @@
+\documentclass{beamer}
+
+% TODO: print out https://www.fuzzingbook.org/code/Intro_Testing.py
+
+\usetheme{Boadilla}
+
+%\includeonlyframes{current}
+
+\usepackage{times}
+\usefonttheme{structurebold}
+\usepackage{listings}
+
+\usepackage{pgf}
+\usepackage{tikz}
+\usepackage{alltt}
+\usepackage[normalem]{ulem}
+\usetikzlibrary{arrows}
+\usetikzlibrary{automata}
+\usetikzlibrary{shapes}
+\usepackage{amsmath,amssymb}
+\usepackage{rotating}
+\usepackage{ulem}
+
+\usetikzlibrary{arrows,automata,shapes}
+\tikzstyle{block} = [rectangle, draw, fill=blue!20, 
+    text width=5em, text centered, rounded corners, minimum height=2em]
+\tikzstyle{bt} = [rectangle, draw, fill=blue!20, 
+    text width=4em, text centered, rounded corners, minimum height=2em]
+
+\lstdefinelanguage{JavaScript}{
+  keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, 
+do, else, case, break},
+  keywordstyle=\color{blue}\bfseries,
+  ndkeywords={class, export, boolean, throw, implements, import, this},
+  ndkeywordstyle=\color{darkgray}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=false,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{purple}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  morestring=[b]',
+  morestring=[b]''
+}
+
+%\setbeamercovered{dynamic}
+\setbeamertemplate{footline}[page number]{}
+\setbeamertemplate{navigation symbols}{}
+\usefonttheme{structurebold}
+
+\title{Software Testing, Quality Assurance \& Maintenance---Lecture 3}
+\author{Patrick Lam\\University of Waterloo}
+\date{January 12, 2026}
+
+\colorlet{redshaded}{red!25!bg}
+\colorlet{shaded}{black!25!bg}
+\colorlet{shadedshaded}{black!10!bg}
+\colorlet{blackshaded}{black!40!bg}
+
+\colorlet{darkred}{red!80!black}
+\colorlet{darkblue}{blue!80!black}
+\colorlet{darkgreen}{green!80!black}
+
+\newcommand{\rot}[1]{\rotatebox{90}{\mbox{#1}}}
+\newcommand{\gray}[1]{\mbox{#1}}
+
+\newenvironment{changemargin}[1]{% 
+  \begin{list}{}{% 
+    \setlength{\topsep}{0pt}% 
+    \setlength{\leftmargin}{#1}% 
+    \setlength{\rightmargin}{1em}
+    \setlength{\listparindent}{\parindent}% 
+    \setlength{\itemindent}{\parindent}% 
+    \setlength{\parsep}{\parskip}% 
+  }% 
+  \item[]}{\end{list}}
+
+
+
+\begin{document}
+
+\usebackgroundtemplate{\tikz\node[opacity=0.1]{\includegraphics[width=\paperwidth]{L02/07172_about_banmochi_ishi_strength_and_grip_testing.JPG}};}
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}
+  \frametitle{Plan}
+
+  \begin{changemargin}{2em}
+
+    More on testing (when to stop?).\\[1em]
+
+    Then, mutation analysis (are your tests actually good?).\\[2em]
+  \end{changemargin}
+\end{frame}
+
+\part{When to stop? \\ Idea 1: Coverage}
+\begin{frame}
+  \partpage
+\end{frame}
+
+\begin{frame}
+  \frametitle{How many tests?}
+  \Large
+  \begin{changemargin}{2em}
+    Do you have enough tests? How do you know?\\[1em]
+
+    Test all inputs?\\[1em]
+
+    State-of-the-industry: code coverage---\\[1em]
+    \hspace*{2em} statement coverage, branch coverage.
+  \end{changemargin}
+\end{frame}
+
+\usebackgroundtemplate{\tikz\node[opacity=0.1]{\includegraphics[width=\paperwidth]{L03/07882_box.JPG}};}
+\begin{frame}
+  \frametitle{Side note: white-box and black-box}
+  \Large
+  \hspace*{1em} When you write tests:\\[0.5em]
+  \begin{changemargin}{2em}
+    \alert{White-box testing:} you can look at the code;\\[1em]
+    \alert{Black-box testing:} you can't look at the code.
+  \end{changemargin}
+\end{frame}
+
+\usebackgroundtemplate{}
+\begin{frame}
+  \frametitle{Control-Flow Graphs}
+  \large
+  \begin{changemargin}{2em}
+    Mostly people use lines of source code to evaluate coverage,
+    but then your coverage depends on newlines.\\[1em]
+    It is possible to be more precise and use \alert{control-flow graphs}, but we won't, this time.
+  \end{changemargin}
+\end{frame}
+
+\usebackgroundtemplate{\tikz\node[opacity=0.1]{\includegraphics[width=\paperwidth]{L03/08467_covered_bridge.JPG}};}
+
+\begin{frame}
+  \frametitle{Statement and Branch Coverage}
+
+  \begin{changemargin}{2em}
+    Given a test suite and a program,\\
+    instrument the program to:
+    \begin{itemize}
+    \item count whether each statement (CFG node) is executed;
+    \item count whether each branch (CFG edge) is taken.
+    \end{itemize}
+    ~\\
+  
+\alert{Statement coverage} is the fraction of statements (nodes) that are
+executed by the test suite. \\[1em]
+\alert{Branch coverage} is the fraction of branches (edges)
+that are executed.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Example Code}
+  \lstinputlisting{code/L03/foo.py}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Example Test Suite}
+  \begin{lstlisting}
+import unittest
+
+from .foo import Foo
+
+class CoverageTests(unittest.TestCase):
+    def test_one(self):
+        f = Foo()
+        f.m(1, 2)
+
+    def test_two(self):
+        f = Foo()
+        f.m(1, -2)
+
+    def test_three(self):
+        f = Foo()
+        f.m(-1, 2)
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Coverage Report}
+\small
+  \begin{lstlisting}
+Name             Stmts  Miss Branch BrPart Cover Missing
+--------------------------------------------------------
+l03/foo.py          11     2      8      2   79% 4, 11
+l03/test_suite.py   12     0      0      0  100%
+--------------------------------------------------------
+TOTAL              124    98     46      2   21%
+  \end{lstlisting}
+
+\hspace*{2em}  HTML report also available.
+  
+\end{frame}
+
+\begin{frame}
+  \frametitle{On Coverage}
+  \begin{changemargin}{2em}
+    Can add missing test cases to visit all lines.\\[1em]
+
+    Even with 100\% branch coverage, \\
+    ~~one is missing an important behaviour: what if \texttt{b} is 0?
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Collecting Coverage Information}
+
+  \begin{changemargin}{2em}
+  How to collect coverage info? Different in different languages.
+  \begin{itemize}
+  \item C: recompile with instrumentation
+  \item Java: virtual machine can collect
+  \item Python: provides hooks
+  \end{itemize}
+  ~\\
+  
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Tracking Python Coverage in Python}
+
+  \begin{changemargin}{2em}
+  Use \texttt{sys.settrace(f)} to register \texttt{f} as a tracing function.
+
+  You can find this tracing function in \texttt{code/L03/tracing.py}:
+  {\small
+  \begin{lstlisting}[language=Python]
+    def traceit(frame: FrameType, event: str, arg: Any)
+                                -> Optional[Callable]:
+    if event == 'line':
+        global coverage
+        function_name = frame.f_code.co_name
+        lineno = frame.f_lineno
+        coverage.append(lineno)
+
+    return traceit
+  \end{lstlisting}
+}  It records the lines that have been executed in variable \texttt{coverage}.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Example: using traceit}
+
+  \begin{changemargin}{2em}
+  There is also a function \texttt{cgi\_decode()} from The Fuzzing Book which I've included in the repo.
+
+  We can activate tracing as follows:
+  \end{changemargin}
+{\small
+\begin{lstlisting}[language=Python]
+def cgi_decode_traced(s: str) -> None:
+    global coverage
+    coverage = []
+    sys.settrace(traceit)  # tracing on
+    cgi_decode(s)
+    sys.settrace(None)     # tracing off
+\end{lstlisting}
+}
+and if we call it and print out the coverage, we get something like:
+{\small
+\begin{lstlisting}[language=Python]
+>>> cgi_decode_traced("a+b")
+>>> print(coverage)
+[12, 13, 12, 13, 12, 13, 12, 13, 12, 13, 12, 14, 12, 14, 12, 14, 12, 14, 12, 14, 12, 15, 12, 15, 12, 15, 12, 15, 12, 15, 12, 15, 12, 16, 12, 16, 12, 19, 20, 21, 22, 23, 25, 34, 35, 21, 22, 23, 24, 35, 21, 22, 23, 25, 34, 35, 21, 36]
+\end{lstlisting}
+}
+~\\
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Python trick: using with}
+
+\hspace*{2em}  Cleaner:
+\begin{lstlisting}[language=Python]
+with Coverage() as cov:
+    function_to_be_traced()
+c = cov.coverage()
+\end{lstlisting}
+
+  \begin{changemargin}{2em}
+
+Also, Python introspection can retrieve source code and pretty-print it, highlighting non-covered lines.\\[1em]
+
+This allows you to write tests to cover these lines.
+  \end{changemargin}
+\end{frame}
+
+\usebackgroundtemplate{}
+
+\begin{frame}
+  \frametitle{Infeasible Test Requirements}
+  \begin{changemargin}{2em}
+    Infeasible to reach 100\% coverage on real programs.
+
+    How much is enough, and why is there a gap?
+  \end{changemargin}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Some Real Coverage Data}
+\begin{center}
+  \includegraphics[height=3in]{L03/coverage.png}
+\end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Case Study: JUnit (4.11) the Artifact}
+  \Large
+\begin{center}
+  \url{https://avandeursen.com/2012/12/21/line-coverage-lessons-from-junit/}
+\end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{JUnit Measurements}
+\begin{center}
+  \includegraphics[height=3in]{L03/cobertura-junit.png}
+\end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{JUnit Stats}
+  \begin{changemargin}{2em}
+    Overall instruction coverage: 85\%.\\[1em]
+    13,000 lines of code, 15,000 lines of test.\\[1em]
+    Consistent with industry average.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{What's not covered? Deprecation}
+  \begin{changemargin}{2em}
+    \begin{itemize}
+    \item deprecated code: 65\% instruction coverage
+    \item nondeprecated code: 93\% instruction coverage
+    \end{itemize}
+    ~\\[1em]
+    \begin{itemize}
+    \item newer code (in {\tt org.junit.*}): 90\% instruction coverage
+      \item older code (in {\tt junit.*}): 70\% instruction coverage
+    \end{itemize}
+
+    ~\\[1em]
+  (Why is this? Perhaps the coverage decreased over time for the deprecated code, since
+no one is really maintaining it anymore, and failing test cases just get removed.)
+\end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{A Whole Untested Class}
+
+  \begin{changemargin}{2em}
+    Blogpost author found one class that was completely untested!\\[1em]
+
+    There were tests.\\
+    But the tests never got run, because they were never added to CI.\\[1em]
+    They also failed when run. (You don't run it, it doesn't work.)
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{The Usual Suspects 1: Too Simple to Test}
+
+  \begin{changemargin}{2em}
+\begin{lstlisting}[language=Java]
+  public static void assumeFalse(boolean b) {
+    assumeTrue(!b);
+  }
+\end{lstlisting}
+
+\begin{lstlisting}[language=Java]
+  /**
+  * Override to set up your specific external resource.
+  *
+  * @throws if setup fails (which will disable {@code after}
+  */
+  protected void before() throws Throwable {
+    // do nothing
+  }
+\end{lstlisting}
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{The Usual Suspects 2: Dead by Design}
+  \begin{changemargin}{2em}
+\begin{lstlisting}[language=Java]
+  /**
+  * Protect constructor since it is a static only class
+  */
+  protected Assert() { }
+\end{lstlisting}
+
+\begin{lstlisting}[language=Java]
+  // should never be executed:
+  catch (InitializationError e) {
+    throw new RuntimeException(
+    "Bug in saff's brain: " +
+    "Suite constructor, called as above, should always complete");
+  }
+\end{lstlisting}
+
+\begin{lstlisting}[language=Java]
+  // unreachable
+  try {
+    ...
+  } catch (InitializationError e) {
+    return new ErrorReportingRunner(null, e); // uncovered
+  }
+\end{lstlisting}
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Thoughts on JUnit Coverage}
+\begin{changemargin}{2em}
+  JUnit: written by people who care about testing.\\[1em]
+
+  Non-deprecated code: 93\% instruction coverage, \\
+  \hspace*{2em} i.e. $\le$ 2--3 untested lines of code per method.\\[1em]
+
+  Probably OK to have lower coverage for deprecated code.\\[1em]
+
+  Don't forget that what is in the tests matters too!
+\end{changemargin}
+\end{frame}
+
+  \end{document}

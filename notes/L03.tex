@@ -171,9 +171,9 @@ in \texttt{tracing.py}, and we can use it to test out tracing:
 def cgi_decode_traced(s: str) -> None:
     global coverage
     coverage = []
-    sys.settrace(traceit)  # Turn on
+    sys.settrace(traceit)  # tracing on
     cgi_decode(s)
-    sys.settrace(None)    # Turn off
+    sys.settrace(None)     # tracing off
 \end{lstlisting}
 
 and if we call it and print out the coverage, we get something like:
