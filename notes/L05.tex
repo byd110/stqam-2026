@@ -15,8 +15,7 @@
     text width=4em, text centered, rounded corners, minimum height=2em]
 
 \lstset{ %
-language=Java,
-basicstyle=\ttfamily,commentstyle=\scriptsize\itshape,showstringspaces=false,breaklines=true,numbers=left}
+basicstyle=\ttfamily,commentstyle=\itshape,showstringspaces=false,breaklines=true,numbers=left}
 \newtcbinputlisting{\codelisting}[3][]{
     extrude left by=1em,
     extrude right by=2em,
@@ -84,14 +83,14 @@ We've talked about the notion of a \emph{software failure}. Recall
 that failures are caused by a \emph{fault} in the software which is executed
 and whose effect propagates to output.
 
-But, who's to say that the output is correct or incorrect? This is the oracle problem. See~\cite{barr15:_oracl_probl_softw_testin} for an exhaustive literature survey on the oracle problem from 2015.
+But, who's to say that the output is correct or incorrect? This is the oracle problem. See~\cite{barr15:_oracl_probl_softw_testin} for an exhaustive survey of the research literature on the oracle problem from 2015.
 
 \section*{The Oracle Problem}
 One can say ``ask a human'', but let's think some more about that.
 
 It really is begging the question, in the strict sense of the term,
 but I've just taken the system's output as being correct when writing
-test cases.  If we're doing that, it boils down to regression testing.
+test cases.  If we're doing that, what we're doing boils down to regression testing.
 
 More fundamentally, though, how should the human know what correct
 behaviour is?
@@ -117,12 +116,13 @@ In terms of helping humans find the right answer, the literature talks about mak
 
 For instance, if you are testing a function that computes the days between two dates, you can easily manually evaluate the number of days between 12/24/2025 and 12/25/2025. But if one of your inputs is -5455/23195/-30879, that's going to be hard to calculate. (The function under test---not shown---sanitizes invalid inputs so that date gets parsed as 1/31/-30879, but is that a leap year?).
 
-The suggestion is instead to generate inputs that fit expected input profiles.
-One might start from inputs that developers use as sanity checks. (You
-sanity check your code, right?) Sanitizing checks inside the code, as well
-as variable names, can also help when building these profiles.
-Valid values for months are between 1 and 12; one can test valid values,
-0, negative values, and a value greater than 12.
+The suggestion is instead to generate inputs that fit expected input
+profiles.  One might start from inputs that developers use as sanity
+checks. (You sanity check your code, right?) Other helpful hints when
+creating profiles include sanitizing checks inside the code and
+variable names.  For instance, common knowledge is that valid values
+for months are between 1 and 12; one can test valid values, 0,
+negative values, and a value greater than 12.
 
 There's more in~\cite{mcminn10:_reduc_qualit_human_oracl_costs} about
 searches starting from normal inputs, genetic algorithms, and generating
@@ -144,9 +144,9 @@ mine the web for strings, or generate strings using metaheuristics
 for the right answer, but apparently it's hard.
 
 \paragraph{Reducing the volume of work for human testers.}
-There's what seems like the eternal dream of test suite reduction,
-for which there are no general-purpose solutions that I'm aware of,
-as well as test case reduction, which we'll talk about sometime.
+There's what seems to me like the eternal dream of test suite reduction,
+for which there are no general-purpose solutions that I'm aware of.
+Also test case reduction, which we'll talk about in the fuzzing module.
 
 \section*{Implicit Oracles}
 Segfaults are always bad. The easiest way to label a test execution as
@@ -155,7 +155,7 @@ with buffer overflows, though you might need a tool to observe those.
 But, in general, you don't need to know anything about the domain or
 the specification to label such tests.
 
-Other types of crashes are also most often incorrect.  Similarly, livelock,
+Other types of crashes are also most often incorrect (though an uncaught exception may be better than silently failing).  Similarly, livelock,
 deadlock, and race conditions are undesirable.  Memory leaks and
 performance degradations (with respect to a baseline) are other things
 that can be automatically detected.

@@ -26,8 +26,8 @@ https://docs.gitlab.com/user/application_security/sast/evaluation_guide/
 _ L09 grammar-based fuzzing (https://www.fuzzingbook.org/html/Grammars.html)
 _ L10 fuzzing APIs (https://www.fuzzingbook.org/html/APIFuzzer.html)
   (March 13; A2 through to constraint-based fuzzing)
-_ L11 reducing failure-inducing inputs (https://www.fuzzingbook.org/html/Reducer.html)
-_ L12 constraint-based fuzzing / property based testing / automatic test generation
+_ L11 constraint-based fuzzing / property based testing / automatic test generation
+_ L12 reducing failure-inducing inputs (https://www.fuzzingbook.org/html/Reducer.html)
   (March 9)
       https://www.fuzzingbook.org/html/FuzzingWithConstraints.html
       https://increment.com/testing/in-praise-of-property-based-testing/
@@ -76,6 +76,7 @@ https://opencourse.inf.ed.ac.uk/sites/default/files/https/opencourse.inf.ed.ac.u
 
 * L14 L07 from W25
 * L15 CBMC/CPROVER, bounded model checking for C, and loop unwinding; verifying Rust with Kani: proof harnesses, contracts, and unsafe Rust
+could also talk about this: https://model-checking.github.io/kani-verifier-blog/2023/08/31/using-kani-to-validate-security-boundaries-in-aws-firecracker.html
 
 assignment questions: https://doina.net/AR15/AR15-L6.pdf
 
@@ -85,7 +86,7 @@ assignment questions: https://doina.net/AR15/AR15-L6.pdf
 * L16 Dafny application: Cedar (might be a bit short)
   (January 26)
 * L17 Dafny
-* L18 Kani vs Dafny
+_ L18 Kani vs Dafny
       TODO loop invariants
 * L19 More Dafny, including VC and lemmas
 * L20 Bubblesort in Dafny
