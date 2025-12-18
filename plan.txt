@@ -13,6 +13,10 @@ _ L06:
        if time permits: SpotBugs, SemGrep, CodeQL, Checker framework
        probably not: static analysis content/using tools (Infer?) (look back at 2019 offering)
 
+https://git.uwaterloo.ca/help/user/application_security/sast/_index.md#supported-languages-and-frameworks
+https://docs.gitlab.com/user/application_security/sast/evaluation_guide/
+
+
 * A1 is due on the day of L08, so could mention fuzzing
 
 3 weeks fuzzing (L03)
@@ -28,6 +32,7 @@ _ L12 constraint-based fuzzing / property based testing / automatic test generat
       https://www.fuzzingbook.org/html/FuzzingWithConstraints.html
       https://increment.com/testing/in-praise-of-property-based-testing/
       https://model-checking.github.io/kani-verifier-blog/2022/10/27/using-kani-with-the-bolero-property-testing-framework.html
+      https://crates.io/crates/proptest
 
 - test generation / assertions 
 - invariant inference: https://www.fuzzingbook.org/html/DynamicInvariants.html
@@ -67,17 +72,21 @@ https://www.cs.cmu.edu/~15414/f18/2018/f17/labs/lab5.pdf
 https://www.cprover.org/cprover-manual/test-suite/
 https://people.mpi-sws.org/~rupak/Papers/SoftwareModelChecking.pdf
 https://www.cprover.org/cbmc/doc/manual.pdf
+https://opencourse.inf.ed.ac.uk/sites/default/files/https/opencourse.inf.ed.ac.uk/fv/2023/l17-cbmc-pres.pdf
 
-_ L14 L07 from W25
-_ L15 CBMC/CPROVER, bounded model checking for C, and loop unwinding
-_ L16 Verifying Rust with Kani: proof harnesses, contracts, and unsafe Rust
+* L14 L07 from W25
+* L15 CBMC/CPROVER, bounded model checking for C, and loop unwinding; verifying Rust with Kani: proof harnesses, contracts, and unsafe Rust
+
+assignment questions: https://doina.net/AR15/AR15-L6.pdf
 
 (A2 due here, could include CBMC)
 
-* 3 weeks Dafny (1251: L13, L14, L15, L16, L17; add the OOPSLA paper)
-* L17 Dafny application: Cedar (might be a bit short)
+* 3 weeks Dafny 
+* L16 Dafny application: Cedar (might be a bit short)
   (January 26)
-* L18 Dafny
+* L17 Dafny
+* L18 Kani vs Dafny
+      TODO loop invariants
 * L19 More Dafny, including VC and lemmas
 * L20 Bubblesort in Dafny
 * L21 Dafny sequences and VCgen
@@ -99,3 +108,4 @@ Symbolic testing
 
 
 https://security.googleblog.com/2025/11/rust-in-android-move-fast-fix-things.html
+
