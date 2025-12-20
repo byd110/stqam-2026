@@ -26,7 +26,7 @@
 \setbeamertemplate{navigation symbols}{}
 \usefonttheme{structurebold}
 
-\title{Software Testing, Quality Assurance \& Maintenance---Lecture 1}
+\title{Software Testing and Quality Assurance---Lecture 1}
 \author{Patrick Lam\\University of Waterloo}
 \date{January 5, 2026}
 
@@ -80,7 +80,8 @@
 
 \begin{frame}
   \begin{center}
-    \Large Situation: your first day of work in WT4---May 5. \\[1em]
+    \Large Situation: your first day of work \\
+    on your next work term---May 5. \\[1em]
     You have to move fast \& \\
     push a change to {\tt main} by end of day.\\[1em]
     Are you going break things? How do you know?
@@ -125,6 +126,7 @@
       \item {\bf ad-hoc testing} (automated tests)
       \item {\bf principled testing} (tools)
       \item linting / type systems
+      \item {\bf bounded model checking }
       \item {\bf formal verification}
       \end{itemize}
     \end{changemargin}
@@ -181,7 +183,8 @@
   \item sanitizers
   \item mutation-based analysis
   \item metamorphic testing
-  \item Dafny, Kani, bounded model checking
+  \item bounded model checking (CBMC, Kani)
+  \item formal verification (Dafny)
     \end{itemize}
   \end{changemargin}
 \end{frame}
@@ -296,6 +299,8 @@ Who suffers from failures?
 
   \frametitle{Why Does Software Go Wrong?}
 
+  \large
+  \begin{changemargin}{2em}
   \begin{enumerate}
   \item crashes and infinite loops;
   \item wrong output;
@@ -304,7 +309,7 @@ Who suffers from failures?
   \item nonfunctional properties;
   \item regressions.
   \end{enumerate}
-
+  \end{changemargin}
 \end{frame}
 
 
@@ -470,7 +475,7 @@ consequential, lost profits, special, indirect or incidental damages.
 
 {\small
   \begin{tabbing}
-Github~~ \= \url{TBA}\\[1em]
+Gitlab~~ \= \url{https://git.uwaterloo.ca/stqam-1261/pdfs}\\[1em]
 Piazza \> (you know where to find it)
   \end{tabbing}
 }
@@ -488,7 +493,8 @@ Piazza \> (you know where to find it)
 {
   \begin{tabbing}
     Instructor:\hspace*{2em} \= Patrick Lam\\
-    TA: \> Aosen Xiong \\
+    TAs: \> Billy Bai \\
+    \> Alex Le Blanc
   \end{tabbing}
 }
 \end{changemargin}
@@ -499,12 +505,12 @@ Piazza \> (you know where to find it)
   \Large
 \begin{changemargin}{1em}
 \begin{tabular}{lr}
-3 individual assignments & 36\% \\
-2 quizzes (1 hour, class time, STC 0040) & 20\% \\
-Final exam & 44\% \\
+3 individual assignments & 30\% \\
+1 midterm (February 16) & 20\% \\
+Final exam & 50\% \\
 \end{tabular}~\\[1em]
 
-Quizzes, final are open-book, open-notes, no Internet.\\[1em]
+Midterm and final are open-book, open-notes, no Internet.\\[1em]
 
 \end{changemargin}
 
@@ -523,15 +529,12 @@ Quizzes, final are open-book, open-notes, no Internet.\\[1em]
   \frametitle{Goals of This Course}
 
     \begin{changemargin}{2em}
-
+\large
+      You will be able to:
   \begin{itemize}
-
-  \item You will be able to create and evaluate test suites for reasonably-sized
-software systems.\\[1em]
-
-  \item You will learn how to use and write tools for software maintenance and
-verification (particularly automated testing tools).\\[1em]
-
+\item write new test suites, improve existing test suites, and critique test suite quality using engineering judgment
+\item use and develop tools (e.g. fuzzers, sanitizers, symbolic executors) to improve software quality
+\item use tools for automatic program verification (e.g. Dafny) or bounded model checking (e.g. CBMC/Kani) 
   \end{itemize}
     \end{changemargin}
 
@@ -547,66 +550,53 @@ verification (particularly automated testing tools).\\[1em]
 \end{frame}
 
 \begin{frame}
-  \frametitle{Learning Outcomes}
-
-  \Large
-  \begin{changemargin}{2em}
-    \begin{itemize}
-    \item write good test suites;
-    \item use tools to improve software uality
-      \item prove software correct using tools (beyond SE 212)
-        \end{itemize}
-  \end{changemargin}
-\end{frame}
-
-
-\begin{frame}
-\frametitle{Part I: Test Suites and Fuzzing}
+\frametitle{Module I: Engineering Test Suites}
 \begin{changemargin}{2em}
 \Large
 \begin{itemize}
 \item writing unit tests;
 \item when to stop writing tests (coverage, mutation analysis);
-\item automatically writing tests with fuzzing (also greybox and with grammars)
+\item oracles;
+\item assorted other techniques, e.g. metamorphic testing, etc.
 \end{itemize}
 \end{changemargin}
 \end{frame}
 
 \begin{frame}
-\frametitle{Part II: Finding Key Inputs via Symbolic Execution}
+\frametitle{Module II: Fuzzing}
+\begin{changemargin}{2em}
+\Large
+\begin{itemize}
+\item automatically writing tests with fuzzing;
+\item mutation-based fuzzing;
+\item grammar-based fuzzing;
+\item fuzzing inputs for APIs;
+\item constraint-based fuzzing / property-based testing / automatic test generation;
+\item reducing failure-inducing inputs.
+\end{itemize}
+\end{changemargin}
+\end{frame}
+
+  
+\begin{frame}
+\frametitle{Module III: Bounded Model Checking}
 \begin{changemargin}{2em}
 \Large
 \begin{itemize}
 \item symbolic execution;
-\item program semantics;
-\item dynamic symbolic execution.
+\item bounded model checking for C and Rust;
+\item loop unwinding, proof harnesses, contracts
 \end{itemize}
 \end{changemargin}
 \end{frame}
 
 \begin{frame}
-\frametitle{Part III: Proving Programs Correct}
+\frametitle{Module IV: Proving Programs Correct}
 \begin{changemargin}{2em}
 \Large
 \begin{itemize}
 \item Dafny;
-\item Bounded model checking: CBMC and Kani;
-\item real-life applications.
-\end{itemize}
-\end{changemargin}
-\end{frame}
-
-\begin{frame}
-\frametitle{Part IV: Grab-bag of Leftovers}
-\begin{changemargin}{2em}
-\Large
-\begin{itemize}
-\item Concurrency
-\item Undefined Behaviour
-\item Metamorphic testing
-\item Security
-\item Library upgrades
-  \item Continuous integration, code review, bug reports
+\item real-life applications thereof
 \end{itemize}
 \end{changemargin}
 \end{frame}
