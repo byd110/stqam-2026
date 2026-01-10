@@ -17,11 +17,10 @@ but you will need to adapt it a bit.
 lines or branches, but we might want it for other reasons. In this
 part, you will compute the complete set of executable lines in the
 functions that have been visited. I think that the easiest way to do
-this is using the Python disassembler, in the \texttt{dis} module. To
-get the same results as us, you should also use \texttt{dis}.
+this is using the Python disassembler, in the \texttt{dis} module.
 
 My template for \texttt{populate\_executable\_lines()} requests the
-function bytecode by creating a \texttt{Bytecode} object for each
+function bytecode by using \texttt{dis} to create a \texttt{Bytecode} object for each
 function that has been seen in the collected trace. (The populate
 functions are called when tracing is turned off.)
 
@@ -55,6 +54,8 @@ an instruction to the one immediately following it. These edges are the same as 
 edges in the executed branches part, although we are computing a dict here and not a set.
 This CFG operates in line numbers and not offsets,
 so you sometimes need to translate.
+
+It is not required to use two loops. [TODO is this true for forward loops?]
 
 In theory, the CFG shouldn't contain a successor edge to the immediately-following instruction after an unconditional
 jump (i.e. case (2) above should only apply when the instruction is not a jump). Ignore that detail for this question.
