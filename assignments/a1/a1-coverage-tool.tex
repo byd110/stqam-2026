@@ -46,7 +46,8 @@ In my implementation, I first compute a dict mapping each instruction's bytecode
 the \texttt{.offset} field of a bytecode instruction) to its line number. Because not every
 instruction has a line number (sometimes it is \texttt{None}), I track the most recently
 seen line number as I iterate through the function's instructions, and store the instruction's
-most recently seen line number for it.
+most recently seen line number for it. (There is also an API call that will compute this dict,
+so you don't have to do it yourself.)
 
 Next, I get a fresh \texttt{get\_instructions} and iterate on it. There are two kinds of edges
 that you need to add: (1) edges from an instruction to its jump target; and (2) edges from
@@ -54,8 +55,6 @@ an instruction to the one immediately following it. These edges are the same as 
 edges in the executed branches part, although we are computing a dict here and not a set.
 This CFG operates in line numbers and not offsets,
 so you sometimes need to translate.
-
-It is not required to use two loops. [TODO is this true for forward loops?]
 
 In theory, the CFG shouldn't contain a successor edge to the immediately-following instruction after an unconditional
 jump (i.e. case (2) above should only apply when the instruction is not a jump). Ignore that detail for this question.
