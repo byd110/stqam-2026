@@ -76,14 +76,245 @@ do, else, case, break},
 
 \begin{document}
 
-\lecture{3 --- January 12, 2026}{Winter 2026}{Patrick Lam}{version 1}
+\lecture{3 --- January 12, 2026}{Winter 2026}{Patrick Lam}{version 2}
+
+\subsection*{Assertions}
+We build tests using assertions. 
+In JUnit, there are three basic built-in choices:
+\begin{enumerate}[noitemsep]
+\item assertTrue(aBooleanExpression)
+\item assertEquals(expected, actual)
+\item assertEquals(expected, actual, tolerance)
+\end{enumerate}
+(There are others too, but let's start with these.)
+
+{\tt assertTrue} is more flexible, since you can
+write anything with a boolean value. However, it can give
+hard-to-diagnose error messages---you need try harder when using it
+if you want good tests.
+
+\paragraph{Using Assertions.}
+Why use assertions? Assertions are good for:
+\begin{itemize}[noitemsep]
+\item checking all the things that should be true (more = better);
+\item serving as documentation:
+    when system in state $S_1$,
+    and I do $X$,
+    assert that the result should be $R$, and
+    that system should be in $S_2$.
+\item allowing failure diagnosis (include assertion messages!)
+\end{itemize}
+
+\newpage
+There are alternatives to using assertions.
+For instance, one can also do external result verification:
+\begin{itemize}[noitemsep]
+\item write output to files; and
+\item use diff (or your own custom diff) to compare
+  expected and actual output.
+\end{itemize}
+
+The twist is that the expected result is then not visible when looking
+at test's source code. (What's a good workaround?)
+
+\paragraph{Verifying Behaviour.} The key is to observe actions
+(calls) of the SUT. Some options:
+\begin{itemize}[noitemsep]
+\item procedural behaviour verification
+  (the challenge in that case: recording and verifying behaviour); or
+\item expected behaviour specification
+  (capturing the outbound calls of the SUT).
+\end{itemize}
+
+\section*{Representation invariants}
+We said that assertions are good for checking all the things that should be
+true. In particular, they can help with checking the integrity of complex data
+structures; in such a case, we can aim to write out all the things that should be true of the data structure.
+Let's look at examples from the Fuzzing chapter of the Fuzzing Book\footnote{\url{https://www.fuzzingbook.org/html/Fuzzer.html}}. The example isn't really a complex data structure, but it does have some expected properties.
+Your typical CS341 data structure is going to have more complex properties, but they are harder to illustrate.
+
+\begin{lstlisting}[language=Python]
+airport_codes: dict[str, str] = {
+    "YVR": "Vancouver",
+    "JFK": "New York-JFK",
+    "CDG": "Paris-Charles de Gaulle",
+    "CAI": "Cairo",
+    "LED": "St. Petersburg",
+    "PEK": "Beijing",
+    "HND": "Tokyo-Haneda",
+    "AKL": "Auckland"
+}  # plus many more
+\end{lstlisting}
+We can introduce a \emph{representation invariant} for this \texttt{dict}:
+\begin{lstlisting}[language=Python]
+def code_repOK(code: str) -> bool:
+    assert len(code) == 3, "Airport code must have three characters: " + repr(code)
+    for c in code:
+        assert c.isalpha(), "Non-letter in airport code: " + repr(code)
+        assert c.isupper(), "Lowercase letter in airport code: " + repr(code)
+    return True
+\end{lstlisting}
+and we can check it:
+\begin{lstlisting}[language=Python]
+assert code_repOK("SEA")
+\end{lstlisting}
+which quietly does not fail. You can also invoke \texttt{code\_repOK} on all of the codes
+in \texttt{airport\_codes}, and in fact, you can make a function to do so:
+\begin{lstlisting}[language=Python]
+def airport_codes_repOK():
+  for code in airport_codes:
+      assert code_repOK(code)
+  return True
+\end{lstlisting}
+If this is an abstract data type, you would usually use a function to add to it:
+\begin{lstlisting}[language=Python]
+def add_new_airport(code: str, city: str) -> None:
+    assert code_repOK(code)
+    assert airport_codes_repOK()
+    airport_codes[code] = city
+    assert airport_codes_repOK()
+\end{lstlisting}
+which checks the data structure before-and-after as well as the input. Might be slow.
+
+Note that this checks properties that are \emph{specific to your data structure}.
+I call them domain-specific properties. It's not just ``program doesn't crash'', it's
+something that encodes information about how your program is supposed to behave.
+It's a matter of taste to encode the right things.
+
+Here's a collection of checks for a red-black tree:
+\begin{lstlisting}[language=Python]
+class RedBlackTree:
+  def repOK(self):
+      assert self.rootHasNoParent()
+      assert self.rootIsBlack()
+      assert self.rootNodesHaveOnlyBlackChildren()
+      assert self.treeIsAcyclic()
+      assert self.parentsAreConsistent()
+      return True
+
+  def rootIsBlack(self):
+      if self.parent is None:
+          assert self.color == BLACK
+          return True
+\end{lstlisting}
+You might (automatically) run these checks every time you add or remove from the red-black tree,
+though an acylicity check might be expensive and best to disable in production.
+This kind of check does work well with automatically-generated inputs from fuzzing,
+which we'll discuss in a few weeks.
+
+\section*{Test Doubles}
+Mock objects are a particular kind of test double. We need test doubles
+because objects collaborate with other objects, but we only want to test
+one object at a time.
+Meszaros categorizes test doubles as follows:
+\begin{itemize}[noitemsep]
+    \item dummy objects: these are not actually test doubles; they don't do anything, but just take up space in parameter lists. Are like {\tt null}, but get past nullness checks in code.
+    \item fake objects: have actual behaviour (which is correct), but somehow unsuitable for use in production; typical example is an in-memory database.
+    \item stubs: produce canned answers in response to interactions from the class under test.
+    \item mocks: like stubs, also produce canned answers. Difference: mock objects also check that the class under test makes the appropriate calls.
+    \item spies: usually wraps the real object (instead of the mock, which stubs it), and records interactions for later verification.
+\end{itemize}
+Shorter reference about test doubles: \url{martinfowler.com/articles/mocksArentStubs.html}
+
+\section*{Mock Objects}
+Before we talk about mock objects, let's look at a stub. Imagine that you have a service that
+sends out emails. You don't actually want to send out emails while you're testing. So here's
+a class that pretends to send out emails.
+\codelisting{}{L02/MailServiceStub.java}
+This stub permits \emph{state verification}, as seen in the following assert in a test:
+\begin{lstlisting}
+  assertEquals(1, mailer.numberSent());
+\end{lstlisting}
+This is state verification because it's checking the contents of
+memory (which should reflect interactions that have happened in the
+past). One could also check the recipients, contents of messages, etc.
+
+\paragraph{jMock example.} 
+Instead of state verification, we can also do behaviour verification. This is
+jMock syntax.
+\codelisting{}{L02/OrderInteractionTester.java}
+The calls to {\tt mock()} create mock objects which have the
+appropriate type.  If you are using the objects as simple dummy
+objects, calling {\tt mock()} and {\tt proxy()} is enough. Note that
+we have a real {\tt Order} object but we're giving it the fake proxy
+objects, as created by the {\tt Mock}'s {\tt proxy()} methods.
+
+We also specify the expected behaviour of the {\tt mailer} and the
+{\tt warehouse}. The test case is saying that the mailer ought to have
+{\tt send()} called on it once, and that the warehouse ought to have
+{\tt hasInventory()} called; that method should return {\tt false()}.
+
+\paragraph{EasyMock example.} Different mock object libraries have different syntax. Here's 
+another example, this time for EasyMock.
+
+\codelisting{}{L02/ExampleTest.java}
+Here we are testing the {\tt ClassUnderTest} and creating a mock object
+of {\tt Collaborator} type. EasyMock 2.3 reads the {\tt @Mock} annotation
+and automatically fills in a mock object of the appropriate type.
+In our test case, we call {\tt replay(mock)} to indicate that we are no
+longer recording expectations, but are instead starting the test case itself.
+In the above code, there are currently no expectations.
+
+Let's add some expectations.
+\codelisting{}{L02/TestAddDocument.java}
+Here we record the fact that the mock should be called with {\tt documentAdded}
+and a parameter "New Document". We also record that the mock's 
+{\tt voteForRemoval} method should be called, and when that happens, it should return
+value 42.
+Finally, we add a call {\tt verify()} to let EasyMock
+know that we're done and that it can go ahead and check that the expected behaviour actually happened.
+
+\section*{Flaky Tests}
+The second test engineering topic I want to talk about today is flaky tests. 
+Flaky tests are those that sometimes fail (nondeterministically).
+Flakiness is not something you want in your test cases. 
+(I have heard one defense of a flaky test: it lets you know that 
+the system has the potential to actually work.) 
+In general, flaky tests don't play well with the expectation that
+your test suite passes 100\%.
+
+Reference:\\
+Qingzhou Luo, Farah Hariri, Lamyaa Eloussi, Darko Marinov. ``An Empirical Analysis of Flaky Tests''. In Proceedings of Foundations of Software Engineering '14.
+
+\paragraph{Dealing with flaky tests.} Companies with large test suites have found mitigations
+for the flaky test suite problem. One can label known-flaky tests as flaky and automatically
+re-run them to see if they eventually pass. One can also ignore or remove flaky tests.
+But this is unsatisfactory: it takes a long time to re-run failing tests.
+
+\paragraph{Causes of flakiness.} Luo et al studied 201 fixes to flaky tests in open-source
+projects. They found that the three most common causes of fixable flaky tests were:
+\begin{enumerate}[noitemsep]
+    \item improper waits for asynchronous responses;
+    \item concurrency; and
+    \item test order dependency.
+\end{enumerate}
+
+The problem that caused flakiness for asynchronous waits was that there was typically a
+{\tt sleep()} call which didn't wait long enough for the action (perhaps a network call)
+to finish. The best practice is to use some sort of {\tt wait()} call to wait for the result
+instead of hardcoding a sleep time.
+
+Concurrency problems were what one might expect. The problem could either be in the system under
+test or in the test itself. Problems included data races, atomicity violations, and deadlocks;
+the solutions were the proper use of concurrency primitives (e.g. locks) as seen in CS343.
+
+Test order dependency problems arose when some tests expected other tests to have already
+executed (and left a side effect like a file in the filesystem). They came up especially 
+in the transition from Java 6 to Java 7 because that transition changed the (not-guaranteed)
+test execution order. The solution is to remove the dependency.
+
+\section*{Not unit tests}
+Many interesting things happen when different units interact.
+Integration tests verify end-to-end functionality. They're slower, flakier, and harder both
+to write and use. Focus on unit tests while developing code. But you eventually need
+integration tests to make sure the user sees the right thing.
+
+\section*{When to stop? Idea 1: Coverage}
 
 So, in the testing space, we write a bunch of tests and hope it's good
 enough. For most of us, it's never that fun to write tests. But, you
 want to do a good job, so you should write some number of tests. What
 is that number?
-
-\section*{When to stop? Idea 1: Coverage}
 
 If you could test your function or program on every single input (and
 if you had an oracle to tell you if the output was correct---more on that later), then that
