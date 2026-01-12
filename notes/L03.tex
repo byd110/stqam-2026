@@ -220,14 +220,12 @@ Shorter reference about test doubles: \url{martinfowler.com/articles/mocksArentS
 Before we talk about mock objects, let's look at a stub. Imagine that you have a service that
 sends out emails. You don't actually want to send out emails while you're testing. So here's
 a class that pretends to send out emails.
-\codelisting{}{L02/MailServiceStub.java}
-This stub permits \emph{state verification}, as seen in the following assert in a test:
+\codelisting{}{L03/MailServiceFake.java}
+This stub permits \emph{behavioural verification}, as seen in the following assert in a test:
 \begin{lstlisting}
   assertEquals(1, mailer.numberSent());
 \end{lstlisting}
-This is state verification because it's checking the contents of
-memory (which should reflect interactions that have happened in the
-past). One could also check the recipients, contents of messages, etc.
+This is more like behavioural verification because it's checking that interactions that have happened. Technically, it's checking the state that records the interaction, but I'd still say behavioural rather than state. One could also check the recipients, contents of messages, etc.
 
 \paragraph{jMock example.} 
 Instead of state verification, we can also do behaviour verification. This is
