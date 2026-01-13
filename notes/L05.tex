@@ -83,7 +83,7 @@ We've talked about the notion of a \emph{software failure}. Recall
 that failures are caused by a \emph{fault} in the software which is executed
 and whose effect propagates to output.
 
-But, who's to say that the output is correct or incorrect? This is the oracle problem. See~\cite{barr15:_oracl_probl_softw_testin} for an exhaustive survey of the research literature on the oracle problem from 2015.
+But, who's to say that the output is correct or incorrect? This is the oracle problem. See~\cite{barr15:_oracl_probl_softw_testin} for an exhaustive survey of the research literature on the oracle problem as of 2015.
 
 \section*{The Oracle Problem}
 One can say ``ask a human'', but let's think some more about that.
@@ -103,13 +103,13 @@ def add(x,y):
 Everyone will agree\footnote{JavaScript chooses chaos for \texttt{"3"+5}.} that \texttt{add(1,1)} should return 2. (You are using the function name as the specification.)
 
 Let's consider root-finding. You have a function \texttt{solve\_quadratic()} which solves quadratic equations and you want to test it. If you give it $x^2 - 2x - 4 = 0$, how do you know what answer to test for? You need to read the function name and remember high school math. Also, there are the usual edge cases:
-what should happen if there are no solutions?
+what should happen if there are no solutions? There's also floating-point issues e.g. with comparisons.
 
 \section*{Helping Human Oracles}
 There's no magic here. Later today, we'll talk about some ways that we can
 otherwise calculate the right answer, but sometimes there is
 no alternative to a human looking at the test case and deciding
-whether it is correct or not. It comes down to whether the code
+whether it is correct or not. It comes down to whether the output
 meets its requirements. Eliciting the requirements is a whole other course.
 
 In terms of helping humans find the right answer, the literature talks about making automatically-generated inputs easier to understand, e.g. in~\cite{mcminn10:_reduc_qualit_human_oracl_costs}.
