@@ -1,0 +1,280 @@
+\documentclass{beamer}
+
+% TODO: print out https://www.fuzzingbook.org/code/Intro_Testing.py
+
+\usetheme{Boadilla}
+
+%\includeonlyframes{current}
+
+\usepackage{times}
+\usefonttheme{structurebold}
+\usepackage{listings}
+
+\usepackage{pgf}
+\usepackage{tikz}
+\usepackage{alltt}
+\usepackage[normalem]{ulem}
+\usetikzlibrary{arrows}
+\usetikzlibrary{automata}
+\usetikzlibrary{shapes}
+\usetikzlibrary{backgrounds}
+\usepackage{amsmath,amssymb}
+\usepackage{rotating}
+\usepackage{ulem}
+
+\usetikzlibrary{arrows,automata,shapes}
+\tikzstyle{block} = [rectangle, draw, fill=blue!20, 
+    text width=5em, text centered, rounded corners, minimum height=2em]
+\tikzstyle{bt} = [rectangle, draw, fill=blue!20, 
+    text width=4em, text centered, rounded corners, minimum height=2em]
+
+\lstdefinelanguage{JavaScript}{
+  keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, 
+do, else, case, break},
+  keywordstyle=\color{blue}\bfseries,
+  ndkeywords={class, export, boolean, throw, implements, import, this},
+  ndkeywordstyle=\color{darkgray}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=false,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{purple}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  morestring=[b]',
+  morestring=[b]''
+}
+
+%\setbeamercovered{dynamic}
+\setbeamertemplate{footline}[page number]{}
+\setbeamertemplate{navigation symbols}{}
+\usefonttheme{structurebold}
+
+\title{Software Testing, Quality Assurance \& Maintenance---Lecture 5}
+\author{Patrick Lam\\University of Waterloo}
+\date{January 19, 2026}
+
+\colorlet{redshaded}{red!25!bg}
+\colorlet{shaded}{black!25!bg}
+\colorlet{shadedshaded}{black!10!bg}
+\colorlet{blackshaded}{black!40!bg}
+
+\colorlet{darkred}{red!80!black}
+\colorlet{darkblue}{blue!80!black}
+\colorlet{darkgreen}{green!80!black}
+
+\newcommand{\rot}[1]{\rotatebox{90}{\mbox{#1}}}
+\newcommand{\gray}[1]{\mbox{#1}}
+
+\newenvironment{changemargin}[1]{% 
+  \begin{list}{}{% 
+    \setlength{\topsep}{0pt}% 
+    \setlength{\leftmargin}{#1}% 
+    \setlength{\rightmargin}{1em}
+    \setlength{\listparindent}{\parindent}% 
+    \setlength{\itemindent}{\parindent}% 
+    \setlength{\parsep}{\parskip}% 
+  }% 
+  \item[]}{\end{list}}
+
+
+
+\begin{document}
+
+\usebackgroundtemplate{\tikz\node[opacity=0.1]{\includegraphics[width=\paperwidth]{L05/960px-Delphi_Temple_of_Apollo.jpeg}};}
+\begin{frame}
+  \titlepage
+  {\scriptsize
+    Background: Temple of Apollo @ Delphi; by Skyring - Own work, CC BY-SA 4.0, \url{https://commons.wikimedia.org/w/index.php?curid=64170779}
+    }
+\end{frame}
+
+\usebackgroundtemplate{}
+\part{The Oracle Problem}
+\begin{frame}
+  \partpage
+  
+\end{frame}
+
+\begin{frame}
+  \frametitle{What's the right answer?}
+  \Huge
+  \begin{changemargin}{2em}
+    cop-out: ``ask a human''
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Begging the Question}
+  \Large
+  \begin{changemargin}{2em}
+    Taking the answer the system computes \\ as the right answer.\\[1em]
+    (is the basis for regression testing, though)
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Simple example: add}
+  \Large
+  \begin{changemargin}{2em}
+    \begin{lstlisting}[language=Python]
+      def add(x, y):
+        return x + y
+    \end{lstlisting}
+    ~\\[1em]
+    We all agree about the output of \texttt{add(1,1)}.\\[1em]
+
+    Right?
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{(Almost)}
+  \Large
+  \begin{changemargin}{2em}
+    (What about \texttt{add("3", 5)} in JavaScript?)
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{High school math}
+  \Large
+  \begin{changemargin}{2em}
+    Consider function \texttt{solve\_quadratic()} for
+    \[ x^2-2x-4 = 0. \]
+
+    Need to read the function name and remember high school math.\\[2em]
+
+    Also, edge cases: no solutions;\\ \qquad floating-point shenanigans.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Human Oracles: source of truth}
+  \Large
+  \begin{changemargin}{2em}
+  Unit level: Mainly use the function name,\\
+  plus any function documentation (if it exists).\\[1em]
+
+  More generally: You use your human experience to say what the answer should be.
+  \end{changemargin}
+\end{frame}
+
+\part{Helping Human Oracles}
+\begin{frame}
+  \partpage
+\end{frame}
+
+\begin{frame}
+  \frametitle{Sometimes there is no alternative}
+  \Huge
+  \begin{changemargin}{2em}
+    You may have to \\ ask a human.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Basis for judgment}
+  \Large
+  \begin{changemargin}{2em}
+    Does the output meet the system requirements?\\[2em]
+
+    (Eliciting requirements not in scope for this course.)
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Easy versus hard inputs}
+  \Large
+  \begin{changemargin}{2em}
+    Setting: function \texttt{calculate\_days\_between()}.\\[2em]
+    What's the answer for:
+    \begin{itemize}
+    \item 12/24/2025 and 12/25/2025?
+    \end{itemize}~ \\[0em]
+    What about
+    \begin{itemize}
+    \item -5455/23195/-30879 and -5460/24100/-30800?
+    \end{itemize}
+    Even if we sanitize/declare negative numbers invalid, some
+     inputs are still easier to check.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Input Profiles}
+  \Large
+  \begin{changemargin}{2em}
+    Generate inputs that fit expected input profiles:\\[2em]
+    
+    Start with developers' sanity-check inputs \\
+    \qquad (like 12/24/2025 and 12/25/2025 etc).\\[2em]
+
+    Also, sanitizing checks inside the code are good places to start.\\[2em]
+
+    Months: valid months, 0, -1, 13.\\[2em]
+    
+  \end{changemargin}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Other options}
+  \Large
+  \begin{changemargin}{2em}
+    1. Start from normal inputs, \\
+    \hspace*{2em} use genetic algorithms, \\
+    \hspace*{2em} or generate from distributions.\\[1em]
+
+    2. Reuse partial inputs, manually modified;\\
+    \hspace*{2em} change one thing at a time,\\
+    \hspace*{2em} thus, easier to reason about changes in the output.\\[1em]
+    \hspace*{2em} e.g. go from 0/1/2010 to 1/1/2010, etc.
+    
+  \end{changemargin}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Integers vs strings}
+  \large
+  \begin{changemargin}{2em}
+    Even though some integers aren't very good (e.g. 23195),\\
+    it's still easier to create integers than strings,\\
+    and easier to create strings than e.g. trees.\\[2em]
+
+    Space of strings is bigger; \\
+    space of sensible strings is proportionally smaller.\\[2em]
+
+    Can use random strings as fuzzed inputs,\\
+    but also want strings that pass sanity checks.\\[2em]
+
+    Can mine the web for strings, or generate strings using heuristics
+    (or LLMs).
+        
+  \end{changemargin}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Crowdsourcing inputs}
+  \Large
+  \begin{changemargin}{2em}
+    People have tried to use Mechanical Turk.\\[2em]
+    Apparently it's hard to get good results.
+  \end{changemargin}
+\end{frame}
+
+\usebackgroundtemplate{\begin{tikzpicture}\node[opacity=0.3]{\hspace*{.2\paperwidth} \includegraphics[width=.6\paperwidth, trim=0 0 0 -20em]{L05/02936_mini_churchy_entrance_v1.jpg}};\end{tikzpicture}}
+\begin{frame}
+  \frametitle{Reducing volume of work for human testers}
+  \Large
+  \begin{changemargin}{2em}
+    People always hope for test suite reduction.\\
+    I'm not aware of good general-purpose solutions.\\[2em]
+    Also: test case reduction; \\
+    we'll talk about that in the fuzzing module.
+  \end{changemargin}
+\end{frame}
+
+  
+\end{document}

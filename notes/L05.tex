@@ -106,7 +106,8 @@ Everyone will agree\footnote{JavaScript chooses chaos for \texttt{"3"+5}.} that 
 Now, let's consider root-finding. You have a function \texttt{solve\_quadratic()} which solves quadratic equations and you want to test it. If you give it $x^2 - 2x - 4 = 0$, how do you know what answer to test for? You need to read the function name and remember high school math. Also, there are the usual edge cases:
 what should happen if there are no solutions? (Also, don't forget floating-point issues e.g. with comparisons.)
 
-As a human oracle, you are using the function name as the specification, combined with your human experience. Maybe you also consider the function documentation, if it exists.
+As a human oracle, at a unit test level, you are using the function/class name as the specification. Maybe you also consider the code documentation, if it exists.
+At all levels, you combine the information that you have with your human experience. Hopefully it is reflective of the user base.
 
 \section*{Helping Human Oracles}
 There's no magic here. Later today, we'll talk about some ways that we can
