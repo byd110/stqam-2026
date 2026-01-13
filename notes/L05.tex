@@ -15,7 +15,7 @@
     text width=4em, text centered, rounded corners, minimum height=2em]
 
 \lstset{ %
-basicstyle=\ttfamily,commentstyle=\itshape,showstringspaces=false,breaklines=true,numbers=left}
+basicstyle=\small\ttfamily,commentstyle=\itshape,showstringspaces=false,breaklines=true,numbers=left}
 \newtcbinputlisting{\codelisting}[3][]{
     extrude left by=1em,
     extrude right by=2em,
@@ -89,8 +89,9 @@ But, who's to say that the output is correct or incorrect? This is the oracle pr
 One can say ``ask a human'', but let's think some more about that.
 
 It really is begging the question, in the strict sense of the term,
-but I've just taken the system's output as being correct when writing
-test cases.  If we're doing that, what we're doing boils down to regression testing.
+but I've been known to just take the system's output as being correct when writing
+test cases.  If we're doing that, what we're doing boils down to regression testing
+(depending on how critically we consider the output).
 
 More fundamentally, though, how should the human know what correct
 behaviour is?
@@ -100,16 +101,18 @@ This one seems easy:
 def add(x,y):
   return x + y
 \end{lstlisting}
-Everyone will agree\footnote{JavaScript chooses chaos for \texttt{"3"+5}.} that \texttt{add(1,1)} should return 2. (You are using the function name as the specification.)
+Everyone will agree\footnote{JavaScript chooses chaos for \texttt{"3"+5}.} that \texttt{add(1,1)} should return 2.
 
-Let's consider root-finding. You have a function \texttt{solve\_quadratic()} which solves quadratic equations and you want to test it. If you give it $x^2 - 2x - 4 = 0$, how do you know what answer to test for? You need to read the function name and remember high school math. Also, there are the usual edge cases:
-what should happen if there are no solutions? There's also floating-point issues e.g. with comparisons.
+Now, let's consider root-finding. You have a function \texttt{solve\_quadratic()} which solves quadratic equations and you want to test it. If you give it $x^2 - 2x - 4 = 0$, how do you know what answer to test for? You need to read the function name and remember high school math. Also, there are the usual edge cases:
+what should happen if there are no solutions? (Also, don't forget floating-point issues e.g. with comparisons.)
+
+As a human oracle, you are using the function name as the specification, combined with your human experience. Maybe you also consider the function documentation, if it exists.
 
 \section*{Helping Human Oracles}
 There's no magic here. Later today, we'll talk about some ways that we can
 otherwise calculate the right answer, but sometimes there is
 no alternative to a human looking at the test case and deciding
-whether it is correct or not. It comes down to whether the output
+whether it is correct or not, as discussed just above. It comes down to whether the output
 meets its requirements. Eliciting the requirements is a whole other course.
 
 In terms of helping humans find the right answer, the literature talks about making automatically-generated inputs easier to understand, e.g. in~\cite{mcminn10:_reduc_qualit_human_oracl_costs}.
@@ -207,12 +210,14 @@ these test cases:
 \end{itemize}
 The action predicate is saying what the result of the action is supposed to be---it acts as an oracle.
 
-The model uses sets, while a real implementation might use a container data structure---when writing the test case, one has to convert from specification items to implementation items.
+The model uses sets, while a real implementation might use a container data structure---when writing the test case, one has to convert from specification terms to implementation terms.
 
 \paragraph{Modelling in the implementation language.}
-The model above used sets.
-To some extent, it is possible to specify properties in the
-implementation langauge. For a filesystem that lives on the disk,
+The model above used abstract sets.
+To some extent, it is possible to specify properties using objects in the
+implementation langauge.
+
+For a filesystem that lives on the disk,
 this may be difficult: there may not be an in-memory data structure that
 represents the set of trashed files.
 
@@ -225,8 +230,17 @@ Some languages have specialized syntax for specifying preconditions,
 postconditions, and invariants, but they can be compiled down to assertions
 inserted in the appropriate places. 
 
+\begin{lstlisting}[language=Python]
+# partially self-verifying appendToList implementation
+def appendToList(l,elem):
+  l.append(elem)
+  assert elem in l
+\end{lstlisting}
+
 Assertions can serve as explicit oracles, in contrast to the implicit
-oracles we talked about above. Just like the implicit oracles, if an
+oracles we talked about above. You write a test case that arranges and acts,
+but if your system under test contains assertions, then you have some explicit oracles
+embedded in the code. Just like the implicit oracles, if an
 assertion fails, then we know that this is a test case failure. There
 is a bit more assurance in the event of an assertion success, but
 I'd feel better about tests derived from model-based specifications.
@@ -240,10 +254,11 @@ which describes the overall system state. Wikipedia provides the turnstile examp
 \end{center}
 
 One can use the FSM as a test oracle; inserting a coin in a locked turnstile
-should result in a turnstile in unlocked state.
+should result in a turnstile in unlocked state. Exercise: write a test case that
+expresses that idea.
 
 \section*{Derived Test Oracles}
-What about when there are no specifications? (This is the most common case).
+What about when there are no specifications, or the specifications are insufficient or unhelpful? (As you may have noticed, this is the most common case).
 Here are some options.
 
 \paragraph{Pseudo-oracles.} Consider a straightforward implementation
@@ -284,7 +299,7 @@ versions to get a ``right'' answer. It's sort of an oracle, though
 if all of the versions are programmed to the wrong specification,
 we still lose.
 
-\paragraph{Regression testing.} As mentioned earlier today, regression
+\paragraph{Regression testing.} As mentioned earlier, regression
 testing uses an earlier version as an oracle. A perfective change
 in the software may require the right answer to be corrected, if
 it's because the software's specifications have changed.
@@ -296,9 +311,13 @@ I generally trust nothing coming from an LLM.
 
 \paragraph{Specification mining.} There is work on automatically
 deriving specifications from program executions, both in the form
-of invariants and more general specifications. We won't go into that here.
+of invariants and more general specifications. We won't go into that.
 
 \paragraph{Metamorphic testing.} Coming up in the next lecture.
+
+\paragraph{ECE653 note.} I am thinking of having an ECE653-only
+question on the midterm where I ask specific questions which can be answered based on the 
+survey~\cite{barr15:_oracl_probl_softw_testin}.
 
 \bibliographystyle{alpha}
 \bibliography{L05}
