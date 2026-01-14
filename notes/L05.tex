@@ -210,6 +210,7 @@ these test cases:
 \item when uploading a new file, check that the file ends up in the uploaded set, checking that trashed and shared remain the same.
 \end{itemize}
 The action predicate is saying what the result of the action is supposed to be---it acts as an oracle.
+Models can also be verified for internal consistency.
 
 The model uses sets, while a real implementation might use a container data structure---when writing the test case, one has to convert from specification terms to implementation terms.
 
@@ -266,7 +267,7 @@ Here are some options.
 computing Fibonacci numbers imperatively:
 
 \begin{lstlisting}[language=Python]
-def fib(n):
+def fib\_imperative(n):
     a = 1
     b = 1
     next = b  
@@ -284,7 +285,7 @@ def fib(n):
 Of course, we can also implement Fibonacci recursively, though
 it's inefficient.
 \begin{lstlisting}[language=Python]
-def fib(n):
+def fib\_recursive(n):
     if n == 0:
         return 0
     elif n == 1 or n == 2:
@@ -302,8 +303,9 @@ we still lose.
 
 \paragraph{Regression testing.} As mentioned earlier, regression
 testing uses an earlier version as an oracle. A perfective change
-in the software may require the right answer to be corrected, if
-it's because the software's specifications have changed.
+in the software may require the right answer to be corrected, because
+the previous version was wrong. Perhaps
+the software's specifications have changed.
 
 \paragraph{Textual documentation.} Text can also serve as a source
 of truth. Usually, text requires humans to decipher it and convert

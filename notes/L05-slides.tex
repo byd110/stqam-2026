@@ -9,6 +9,7 @@
 \usepackage{times}
 \usefonttheme{structurebold}
 \usepackage{listings}
+\usepackage[listings]{tcolorbox}
 
 \usepackage{pgf}
 \usepackage{tikz}
@@ -276,5 +277,263 @@ do, else, case, break},
   \end{changemargin}
 \end{frame}
 
+\usebackgroundtemplate{}
+\part{Implicit Oracles}
+\begin{frame}
+  \partpage
   
+\end{frame}
+
+\usebackgroundtemplate{\tikz\node[opacity=0.1]{\includegraphics[width=\paperwidth, trim=0 0 0 -10em]{L01/00856_destroyed_bridge_ribbon_falls.JPG}};}
+\begin{frame}
+  \frametitle{Segfaults: always bad}
+  \Large
+  \begin{changemargin}{2em}
+    \includegraphics[width=.8\paperwidth]{L05/segfault.png} \\[.3em]
+    Can always label as bad: Buffer overflows, segfaults, etc. \\[1em]
+    Might need a tool (e.g. Valgrind, AddressSanitizer) to identify some undefined behaviour.\\[1em]
+    Don't need any domain knowledge here.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Also bad (what is ``etc'')}
+  \Large
+  \begin{changemargin}{2em}
+    \begin{itemize}
+    \item other crashes \\
+      \hspace*{2em}(but: uncaught exception vs \\
+      \hspace*{3em} quiet quitting?)
+    \item race conditions, livelock, deadlock
+    \item memory leaks, performance degradations
+    \end{itemize}
+  \end{changemargin}
+\end{frame}
+
+\usebackgroundtemplate{\tikz\node[opacity=0.3]{\includegraphics[width=\paperwidth]{L03/09038_lots_of_moss_v1.JPG}};}
+\begin{frame}
+  \frametitle{Fuzzing \& Implicit Oracles}
+  \Large
+  \begin{changemargin}{2em}
+    Preview of fuzzing lectures: \\[1em]
+    because we autogenerate heaps of inputs, \\
+    we have no way of checking their outputs.\\[2em]
+
+    Can only check implicit oracles: no broken assertions, no crashes, use other sanitizers.\\[1em]
+
+    Even less evidence for correctness than artisanal tests.
+  \end{changemargin}
+\end{frame}
+
+\usebackgroundtemplate{}
+\part{Specification-based Oracles}
+\begin{frame}
+  \partpage
+\end{frame}
+
+\begin{frame}
+  \frametitle{Enabling Verification}
+  \Large
+  \begin{changemargin}{2em}
+    What should the implementation do?\\[1em]
+    One answer: what the specification says.\\[2em]
+    Specification: a description of [a part of] a system.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Model-based specification}
+  \Large
+  \begin{changemargin}{2em}
+    Use modelling languages to describe system behaviour.\\[1em]
+    e.g. an Alloy action predicate:
+\begin{lstlisting}[basicstyle=\small]
+pred upload [f : File] {
+  f not in uploaded         // guard
+  uploaded' = uploaded + f  // effect on uploaded
+  trashed' = trashed        // no effect on trashed
+  shared' = shared          // no effect on shared
+}
+\end{lstlisting}
+says what changes in the model when a file is uploaded---acts as an oracle.\\
+System state is modelled by sets or relations.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Using the Model}
+  \Large
+  \begin{changemargin}{2em}
+    Can write test cases verifying the specified behaviour:
+    \begin{itemize}
+      \item what happens if we upload an already-uploaded file?
+      \item when we upload a file, does the file appear in the uploaded set?
+    \end{itemize}
+    Need to translate between the model's sets and the implementation's data structures.
+    
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Modelling in the Implementation Language}
+  \Large
+  \begin{changemargin}{2em}
+    Instead of a dedicated modelling language, use
+    the program's data structures.\\[1em]
+    This is back to writing assertions.\\[1em]
+    Also: preconditions, postconditions, invariants
+    (possibly with specialized syntax e.g. @ensures).
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Modelling example}
+  \Large
+  \begin{changemargin}{2em}
+\begin{lstlisting}[language=Python]
+  # partially self-verifying
+  # appendToList implementation
+def appendToList(l,elem):
+  l.append(elem)
+  assert elem in l
+\end{lstlisting}
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Implementation Language Modelling Challenges}
+  \Large
+  \begin{changemargin}{2em}
+    e.g. for a disk-based filesystem, can't verify using in-memory info.\\[1em]
+
+    some conditions are expensive to verify, e.g. is a linked list acyclic?
+  \end{changemargin}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Assertions as Explicit Oracles}
+  \Large
+  \begin{changemargin}{2em}
+    The conditions embedded in the assertions are explicit oracles (not implicit).\\[1em]
+    Your test case arranges and acts, and then uses the embedded explicit oracles.\\[1em]
+    Embedded assertion failure = test case failure (like implicit oracles): a bit more assurance.\\[1em]
+    Model-based specifications still better.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{State Transition Systems}
+  \Large
+  \begin{changemargin}{2em}
+Kind of similar to model-based specification; turnstile example from Wikipedia:
+\begin{center}
+  \includegraphics[width=.5\textwidth]{L05/Turnstile_state_machine_colored.png}
+\end{center}
+Use the FSM as a test oracle---e.g. inserting a coin in a locked turnstile should result in an unlocked turnstile.
+\\[1em]
+
+You can write a test to check this.
+
+  \end{changemargin}
+\end{frame}
+
+\usebackgroundtemplate{}
+\part{Derived Test Oracles}
+\begin{frame}
+  \partpage
+\end{frame}
+
+\begin{frame}
+  \frametitle{Not Enough Specs}
+  \Large
+  \begin{changemargin}{2em}
+    Often, there are no specifications, or the specifications are insufficient or unhelpful.\\[1em]
+    Derived test oracles of various sorts:
+    \begin{itemize}
+    \item pseudo-oracles;
+    \item regression testing;
+    \item textual documentation;
+    \item specification mining;
+    \item metamorphic testing.
+    \end{itemize}
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Pseudo-Oracles}
+  \Large
+  \begin{changemargin}{2em}
+    You have to test this imperative implementation:
+\begin{lstlisting}[language=Python,basicstyle=\small]
+def fib\_imperative(n):
+    a = 1
+    b = 1
+    next = b  
+    count = 1
+    seq = [1, 1]
+
+    while count <= n:
+        count += 1
+        a, b = b, next
+        next = a + b
+        seq.append(next)
+    return seq
+\end{lstlisting}
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Recursive fib}
+  \Large
+  \begin{changemargin}{2em}
+The recursive implementation matches the definition of fib closely:
+\begin{lstlisting}[language=Python,basicstyle=\small]
+def fib\_recursive(n):
+    if n == 0:
+        return 0
+    elif n == 1 or n == 2:
+        return 1
+    return fib(n-1) + fib(n-2)
+\end{lstlisting}
+Create tests (perhaps automatically) that compare outputs of the two versions.\\[0.5em]
+
+Generalization: $N$-version programming, vote on the most popular answer.\\[0.5em]
+Sort of an oracle, though if all versions implement the wrong spec, you still lose.
+
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Regression Testing as Pseudo-Oracles}
+  \Large
+  \begin{changemargin}{2em}
+    One can consider the earlier version to be a sort of pseudo-oracle.\\[1em]
+    But a perfective change in the software means that the earlier version was actually wrong,\\
+    or maybe the specifications have changed.
+    
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Textual documentation}
+  \Large
+  \begin{changemargin}{2em}
+    Words also serve as a source of truth.\\[1em]
+    Historically: then deciphered by humans, \\
+    and converted into specifications.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Specification mining}
+  \Large
+  \begin{changemargin}{2em}
+    Lots of work on observing program executions \\
+    and deriving specifications (invariants and more generally).\\[1em]
+    Won't talk about that in this course,\\
+    but Daikon is one research tool that does this.
+  \end{changemargin}
+\end{frame}
+
 \end{document}

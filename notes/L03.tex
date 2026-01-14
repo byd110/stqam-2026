@@ -222,7 +222,7 @@ sends out emails. You don't actually want to send out emails while you're testin
 a class that pretends to send out emails.
 \codelisting{}{L03/MailServiceFake.java}
 This stub permits \emph{behavioural verification}, as seen in the following assert in a test:
-\begin{lstlisting}
+\begin{lstlisting}[language=Java]
   assertEquals(1, mailer.numberSent());
 \end{lstlisting}
 This is more like behavioural verification because it's checking that interactions that have happened. Technically, it's checking the state that records the interaction, but I'd still say behavioural rather than state. One could also check the recipients, contents of messages, etc.

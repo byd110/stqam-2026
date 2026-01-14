@@ -179,7 +179,7 @@ do, else, case, break},
   \frametitle{Mock Objects: Email Sender}
   \begin{changemargin}{1cm}
 {\small
-  \begin{lstlisting}
+  \begin{lstlisting}[language=Java]
   // state or behaviour verification?
   public class MailServiceFake
                  implements MailService {
@@ -202,7 +202,7 @@ do, else, case, break},
   \frametitle{Mock Objects: Behaviour Verification}
   \begin{changemargin}{1cm}
 {\small
-  \begin{lstlisting}
+  \begin{lstlisting}[language=Java]
 // jMock syntax
 class OrderInteractionTester... {
   public void testOrderSendsMailIfUnfilled() {
@@ -228,7 +228,7 @@ class OrderInteractionTester... {
   \frametitle{Mock Objects: Document Management}
   \begin{changemargin}{1cm}
 {\small
-  \begin{lstlisting}
+  \begin{lstlisting}[language=Java]
 // EasyMock syntax
 @RunWith(EasyMockRunner.class)
 public class ExampleTest {
@@ -255,7 +255,7 @@ public class ExampleTest {
   \frametitle{Mock Objects: Using a Mock}
   \begin{changemargin}{1cm}
 {\small
-  \begin{lstlisting}
+  \begin{lstlisting}[language=Java]
 @Test
 public void testAddDocument() {
   // ** recording phase **
@@ -429,12 +429,12 @@ that are executed.
 
 \begin{frame}
   \frametitle{Example Code}
-  \lstinputlisting{code/L03/foo.py}
+  \lstinputlisting[language=Python]{code/L03/foo.py}
 \end{frame}
 
 \begin{frame}[fragile]
   \frametitle{Example Test Suite}
-  \begin{lstlisting}
+  \begin{lstlisting}[language=Python]
 import unittest
 
 from .foo import Foo
