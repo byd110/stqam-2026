@@ -1,10 +1,10 @@
 * 3 weeks practical testing content (L01, L02, L03, L04)
 
-__ L01: general course intro (needs update, brief mention of oracles)
+_* L01: general course intro (needs update, brief mention of oracles)
 ** L02: exploratory testing, regression testing, unit tests, behaviour vs state, representation invariants, test doubles, mock objects, flaky tests
 ** L03: coverage (https://www.fuzzingbook.org/html/Coverage.html) -> likely to be short, but put lots of stuff in L06, including also perhaps static analysis/semgrep content
 ** L04: mutation analysis; what does graph coverage buy?
-*_ L05: oracles (https://ieeexplore.ieee.org/document/6963470)
+** L05: oracles (https://ieeexplore.ieee.org/document/6963470)
        https://www.cse.ust.hk/~scc/publ/CS98-01-metamorphictesting.pdf
 _ L06:
        metamorphic testing
@@ -21,13 +21,13 @@ https://docs.gitlab.com/user/application_security/sast/evaluation_guide/
 
 3 weeks fuzzing (L03)
 
-* L07 intro to fuzzing / address sanitizer
-* L08 mutation-based fuzzing
-_ L09 grammar-based fuzzing (https://www.fuzzingbook.org/html/Grammars.html)
-_ L10 fuzzing APIs (https://www.fuzzingbook.org/html/APIFuzzer.html)
+*_ L07 intro to fuzzing / address sanitizer
+*_ L08 mutation-based fuzzing
+__ L09 grammar-based fuzzing (https://www.fuzzingbook.org/html/Grammars.html)
+__ L10 fuzzing APIs (https://www.fuzzingbook.org/html/APIFuzzer.html)
   (March 13; A2 through to constraint-based fuzzing)
-_ L11 constraint-based fuzzing / property based testing / automatic test generation
-_ L12 reducing failure-inducing inputs (https://www.fuzzingbook.org/html/Reducer.html)
+__ L11 constraint-based fuzzing / property based testing / automatic test generation
+__ L12 reducing failure-inducing inputs (https://www.fuzzingbook.org/html/Reducer.html)
   (March 9)
       https://www.fuzzingbook.org/html/FuzzingWithConstraints.html
       https://increment.com/testing/in-praise-of-property-based-testing/
