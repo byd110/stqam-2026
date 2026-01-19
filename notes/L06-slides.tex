@@ -1,0 +1,452 @@
+\documentclass{beamer}
+
+% TODO: print out https://www.fuzzingbook.org/code/Intro_Testing.py
+
+\usetheme{Boadilla}
+
+%\includeonlyframes{current}
+
+\usepackage{times}
+\usefonttheme{structurebold}
+\usepackage{listings}
+\usepackage[listings]{tcolorbox}
+
+\usepackage{pgf}
+\usepackage{tikz}
+\usepackage{alltt}
+\usepackage[normalem]{ulem}
+\usetikzlibrary{arrows}
+\usetikzlibrary{automata}
+\usetikzlibrary{shapes}
+\usetikzlibrary{backgrounds}
+\usepackage{amsmath,amssymb}
+\usepackage{rotating}
+\usepackage{ulem}
+\usepackage{pythonhighlight}
+
+\usetikzlibrary{arrows,automata,shapes}
+\tikzstyle{block} = [rectangle, draw, fill=blue!20, 
+    text width=5em, text centered, rounded corners, minimum height=2em]
+\tikzstyle{bt} = [rectangle, draw, fill=blue!20, 
+    text width=4em, text centered, rounded corners, minimum height=2em]
+
+\lstdefinelanguage{JavaScript}{
+  keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, 
+do, else, case, break},
+  keywordstyle=\color{blue}\bfseries,
+  ndkeywords={class, export, boolean, throw, implements, import, this},
+  ndkeywordstyle=\color{darkgray}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=false,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{purple}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  morestring=[b]',
+  morestring=[b]''
+}
+
+%\setbeamercovered{dynamic}
+\setbeamertemplate{footline}[page number]{}
+\setbeamertemplate{navigation symbols}{}
+\usefonttheme{structurebold}
+
+\title{Software Testing, Quality Assurance \& Maintenance---Lecture 6}
+\author{Patrick Lam\\University of Waterloo}
+\date{January 23, 2026}
+
+\colorlet{redshaded}{red!25!bg}
+\colorlet{shaded}{black!25!bg}
+\colorlet{shadedshaded}{black!10!bg}
+\colorlet{blackshaded}{black!40!bg}
+
+\colorlet{darkred}{red!80!black}
+\colorlet{darkblue}{blue!80!black}
+\colorlet{darkgreen}{green!80!black}
+
+\newcommand{\rot}[1]{\rotatebox{90}{\mbox{#1}}}
+\newcommand{\gray}[1]{\mbox{#1}}
+
+\newenvironment{changemargin}[1]{% 
+  \begin{list}{}{% 
+    \setlength{\topsep}{0pt}% 
+    \setlength{\leftmargin}{#1}% 
+    \setlength{\rightmargin}{1em}
+    \setlength{\listparindent}{\parindent}% 
+    \setlength{\itemindent}{\parindent}% 
+    \setlength{\parsep}{\parskip}% 
+  }% 
+  \item[]}{\end{list}}
+
+
+
+\begin{document}
+
+\usebackgroundtemplate{\tikz\node[opacity=0.1]{\includegraphics[width=\paperwidth]{L06/06919_chalk_v1.jpg}};}
+\begin{frame}
+  \titlepage
+  {\scriptsize
+    Background: schist---metamorphic rock.
+  }
+\end{frame}
+
+\usebackgroundtemplate{}
+\part{Metamorphic Testing}
+\begin{frame}
+  \partpage
+  
+\end{frame}
+
+\usebackgroundtemplate{\tikz\node[opacity=0.1]{\includegraphics[width=\paperwidth]{L05/960px-Delphi_Temple_of_Apollo.jpeg}};}
+\begin{frame}
+  \frametitle{No Oracle? Now what?}
+  \Large
+  \begin{changemargin}{2em}
+    Want to run zillions of tests. \\
+    What's the expected output?\\[1em]
+
+    We had implicit oracles, e.g. ``doesn't crash''.\\[1em]
+
+    Can we do better?
+  \end{changemargin}
+\end{frame}
+\usebackgroundtemplate{}
+
+\begin{frame}[fragile]
+  \frametitle{Consider min}
+  \Large
+  \begin{changemargin}{2em}
+    Suspend disbelief \& pretend we have no oracle:
+\begin{python}
+def min(a,b):
+    if a < b:
+        return a
+    else:
+        return b
+\end{python}
+    How can we generate heaps of tests?
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{``New tests from old''}
+  \begin{center}
+    \includegraphics[width=.4\textwidth]{L06/20220802_042715719_lamp.jpg}
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{``New tests from old'' II}
+
+  \Huge
+  \begin{changemargin}{2em}
+    Say \texttt{min(3, 5) = X}.\\[2em]
+    Can we construct another test case with known output?
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{``New tests from old'' III}
+
+\Large
+  \begin{changemargin}{2em}
+    \texttt{min(5, 3) = X} also.\\[2em]
+    A simple example of metamorphic testing:\\
+    even if you don't know X, it's the same X:\\[1em]
+    \texttt{min(5, 3) = min(3, 5)}.\\[1em]
+    Always domain-specific.
+  \end{changemargin}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Observations on metamorphic testing}
+  \Large
+  \begin{changemargin}{1em}
+    You are testing $f$ and you have input $x_0$.
+    \begin{enumerate}
+    \item given one input $x_0$, generate another input $x_1$;
+    \item you know some property of $f(x_1)$ in relation to $f(x_0)$;
+    \item you don't necessarily know $f(x_1)$;
+      \item in fact, you don't need to know $f(x_0)$ in advance!
+    \end{enumerate}
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{min and metamorphic testing: no outputs}
+  \Large
+  \begin{changemargin}{2em}
+    You can randomly generate 1 zillion test inputs for \texttt{min}.\\[1em]
+    By our assumption, we don't have the corresponding outputs, \\ just that \texttt{min} shouldn't crash.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{min and metamorphic testing: what we have}
+  \Large
+  \begin{changemargin}{2em}
+    \begin{itemize}
+    \item can generate another 1 zillion test cases, by inverting parameter order.
+    \item also don't have outputs for these cases, but
+    \item we know that it should be the same as the uninverted input!
+    \end{itemize}
+    That's something, which is better than nothing.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Another example: search}
+  \includegraphics[width=\textwidth]{L06/duckduckgo.png}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Exclusion}
+  \Large
+  \begin{changemargin}{2em}
+    \begin{enumerate}
+    \item Search for ``metamorphic''.
+    \item Get, say, 3300 results.
+    \item Search for ``metamorphic -testing \\ \qquad (i.e. exclude tesing).
+    \item Now get 4200 results.
+    \item ???
+    \end{enumerate}
+    ~\\
+    How do we use this insight to get new tests from old?
+  \end{changemargin}
+\end{frame}
+  
+\begin{frame}
+  \frametitle{Another example: text-to-speech}
+  \begin{center}
+    \includegraphics[width=.6\textwidth]{L06/20260119_022953163_microphone.jpg}
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Speech-to-text scenario}
+  \Large
+  \begin{changemargin}{2em}
+    You are writing a speech-to-text processor.\\[1em]
+  \begin{center}
+    \includegraphics[width=.2\textwidth]{L06/20260119_022953163_microphone.jpg}
+  \end{center}
+    Input: audio file.\\
+    Output: text.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Testing speech-to-text}
+  \Large
+  \begin{changemargin}{2em}
+    \begin{enumerate}
+    \item manual test generation: you record a text and compare to known good output (oracle).
+    \item you (or I) get 130 students to do that.
+    \item you generate audio using text-to-speech.
+    \item you use Mechanical Turk to get audio.
+    \end{enumerate}
+    ~\\
+    Still not even close to covering the space of valid inputs, e.g. accents.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Getting lots of inputs\ldots}
+  \Large
+  \begin{changemargin}{2em}
+    Well, there are a lot of audio files on the Internet\ldots \\[2em]
+    \ldots but there is no ground truth, and human oracles are expensive.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{What about property testing?}
+  \Large
+  \begin{changemargin}{2em}
+    ``It doesn't crash on any input.'' OK\ldots\\
+    ``It doesn't transcribe acoustic music into words.'' I guess?\\[2em]
+    These properties don't really validate the system.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Transforming inputs}
+  \Large
+  \begin{changemargin}{2em}
+    Let's say you have one input, which transcribes to \texttt{out}. You can:
+    \begin{itemize}
+    \item double the volume; or, 
+    \item raise the pitch; or,
+    \item increase the tempo; or,
+    \item add background static; or,
+    \item add traffic noises; or,
+    \item combine any of these.
+    \end{itemize}
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Implications of transforming inputs}
+  \Large
+  \begin{changemargin}{2em}
+    ``add traffic noises'' has a lot of freedom; \\
+    you can add 10 different traffic noises.\\[1em]
+    Then, double the volume on each of them;\\
+    now have 22 test cases.\\[1em]
+    etc.\\[1em]
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Further implications}
+  \Large
+  \begin{changemargin}{2em}
+    What's more, you know the output for all these cases.\\
+    
+    Your tests cover much more of the input space.\\
+    Still no accents, though.\\[1em]
+    What if you didn't have the known output?\\
+    Can download any audio from the Internet.\\
+    Still have the equality relation with the transformed inputs.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Example: YouTube search}
+  \includegraphics[width=\textwidth]{L06/metamorphic-youtube.png}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Example: tagged image search}
+  \includegraphics[width=\textwidth]{L06/fauna.png}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Example: tagged image search}
+  \Large
+  \begin{changemargin}{2em}
+    For our example: tags ``red'' and ``blue''.\\
+    An image may be tagged both ``red'' and ``blue''.\\[1em]
+
+    Say there are 4 images. \\
+    \{1, 2, 3\} are tagged ``red''.\\
+    \{1, 2, 4\} are tagged ``blue''.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Some tagged image search queries}
+  \Large
+  \begin{changemargin}{2em}
+    Query: ``has any tag'': \{ 1, 2, 3, 4\} (n=4).\\
+    Query: ``red'': \{1, 2, 3\} (n=3).\\
+    Query: ``blue'': \{1, 2, 4\} (n=3).\\[1em]
+    It must be that
+    \[ 3 + 3~ (red + blue) \ge 4 ~(any). \]
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Metamorphic relation output patterns}
+  \Large
+  \begin{changemargin}{2em}
+    A list of patterns from the paper:
+    \begin{itemize}
+    \item equivalence: same output items, perhaps in different order;
+    \item equality: same output items, same order;
+    \item subset: follow-up output has a subset of original output;
+    \item disjoint: source and follow-up outputs have no items in common;
+    \item complete: union of follow-up outputs completely make up source output;
+    \item difference: source and follow-up outputs differ by a specific set $D$.
+    \end{itemize}
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Metamorphic relation output pattern: equivalence}
+  \Large
+  \begin{changemargin}{2em}
+    Source input is a query.\\
+    Follow-up input is the same query but with some different ordering requested, like ``sort by date''.\\[1em]
+    Expect: same items in outputs, but different order.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Metamorphic relation output pattern: equality}
+  \Large
+  \begin{changemargin}{2em}
+    Had this in the \texttt{min} example at start; also speech-to-text.\\[1em]
+
+    Another example: \\
+    \begin{changemargin}{1em}
+    Source input is a query.\\
+    Follow-up input is the same query but explicitly requesting the default ordering (e.g. sort by relevance).\\[1em]
+    Expect: same items in outputs, with same order.
+    \end{changemargin}
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Metamorphic relation output pattern: subset}
+  \Large
+  \begin{changemargin}{2em}
+    Search engine example with exclusions was like this.\\[1em]
+    Another example: \\
+    \begin{changemargin}{1em}
+    Source input is a geolocation query with radius of 50km.\\
+    Follow-up input is the same query but a smaller radius.\\[1em]
+    Expect: follow-up output is subset of source output.
+    \end{changemargin}
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Metamorphic relation output pattern: disjoint}
+  \Large
+  \begin{changemargin}{2em}
+    Example: \\
+    \begin{changemargin}{1em}
+    source input = Spotify albums of ``michael buble'' from 2012,\\
+ follow-up input = Spotify albums of ``michael buble'' from 2014. \\[1em]
+Expect: there should be no items in both the source and the follow-up output sets.
+    \end{changemargin}
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Metamorphic relation output pattern: complete}
+  \Large
+  \begin{changemargin}{2em}
+    This is a relation between the source output and the set of follow-up outputs.\\[1em]
+
+    Example context: There are short, medium, and long YouTube
+    videos. \\[1em]
+
+    If the source input is for keyword ``testing'', then one can make three follow-up inputs: short ``testing'', medium ``testing'', and long ``testing''.\\[1em]
+    
+    Expect: bombined, the results for short, medium, and long ``testing'' videos should be the same as the results for just ``testing''.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Metamorphic relation output pattern: complete}
+  \Large
+  \begin{changemargin}{2em}
+    Example:
+    \begin{changemargin}{1em}
+    I upload two videos which I know to be similar except for the length and title. \\
+    The create operation returns the video uploaded.\\[1em]
+    Expect: the source and follow-up metadata only differ on length and title,\\
+    $\qquad$ other properties may be the same.
+    \end{changemargin}
+  \end{changemargin}
+\end{frame}
+
+\part{Code Review}
+\begin{frame}
+  \partpage
+\end{frame}
+
+\end{document}

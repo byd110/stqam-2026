@@ -117,13 +117,13 @@ Let the function you're testing be $f$. Three observations:
 \item you only know (properties of) the second expected output $f(x_1)$ in terms of the first actual output $f(x_0)$---you don't need to have a way of calculating the correct $f(x_1)$;
 \item you don't necessarily know what $f(x_0)$ should be either.
 \end{enumerate}
-So, you can randomly generate zillions of test cases for $\mathrm{min}$.
+So, you can randomly generate 1 zillion test inputs for $\mathrm{min}$.
 By assumption, you don't know what the corresponding outputs should be, just that
 $\mathrm{min}$ shouldn't crash (implicit oracles from last time).
 
-You can, however, given your 1 zillion test cases, generate a second zillion test cases,
+You can, however, given your 1 zillion test inputs, generate a second zillion test cases,
 by inverting the parameter order. And you also know that the inverted test case should produce
-the same output as the original test case, and you can assert on that. Well, that's something, better than nothing.
+the same output as the original test case, and you can assert on that. Well, that's something, which is better than nothing.
 
 \paragraph{Example: search engine.}
 One can argue that of course one knows what $\mathrm{min}$ should return.
@@ -143,13 +143,13 @@ one of the answers you got was wrong.
 
 How can you use this insight to get new tests from old?
 
-\paragraph{Example: text-to-speech.}
+\paragraph{Example: speech-to-text.}
 Here's another example, from a blogpost by Hillel Wayne. This one is harder to write
 concrete code for, but you can definitely imagine it. Let's take a
 step back. The situation is that you are writing an English
 speech-to-text processor. You feed it an audio file, and you get text.
 
-This is certainly much more open-ended than anything we see in thie
+This is certainly much more open-ended than anything we see in this
 course. I can read out something, and then compare the output to what
 I expect. You can all do that. But this doesn't even come close to
 covering the space of valid inputs.
@@ -193,8 +193,8 @@ on all the transformed episodes match.
 
 \paragraph{Example: real-life YouTube search.} 
 From~\cite{segura18:_metam_testin_restf_web_apis}, here's an example from the YouTube search API
-in particular. They found that a search for ``winter penthathlon 1949'' returned 15 items;
-but issuing the same query and asking for ordering by date returned 0 items. That's not right.
+in particular. They found that a search for ``winter pentathlon 1949'' returned 15 items;
+but issuing the same query and asking for ordering by date returned 0 items. That's not right\footnote{YouTube today returns things you didn't ask for.}.
 Here is a figure from the paper I've cited.
 
 \includegraphics[width=\textwidth]{L06/metamorphic-youtube.png}
@@ -223,9 +223,9 @@ The paper~\cite{segura18:_metam_testin_restf_web_apis} provides a list of metamo
 Here's a brief explanation.
 
 \begin{itemize}[noitemsep]
-\item Equivalence: the source and follow-up inputs are equivalent---same items, though perhaps in a different order.
+\item Equivalence: the source and follow-up inputs produce equivalent outputs---same items, though perhaps in a different order.
   Example: source input is a query, follow-up input is the same query but with some different ordering requested, like ``sort by date''.
-\item Equality: source and follow-up inputs are equal---same items, same order. Example: source input uses the default value,
+\item Equality: source and follow-up inputs produce equal output---same items, same order. Example: source input uses the default value,
   follow-up input specifically requests the default. Specific example: default order is relevance; initial input omits the order,
   follow-up input asks for relevance order.
 
@@ -234,13 +234,13 @@ Here's a brief explanation.
   Specific example: YouTube videos and narrowing the geolocation further between the source and the follow-up, say from 50km from
   a point to 25km to a point.
 \item Disjoint: source and follow-up outputs should be disjoint. Specific example: source input = Spotify albums of ``michael buble'' from 2012,
-  follow-up input = Spotify albums of ``michael buble'' from 2014. There should be no items in both sets.
+  follow-up input = Spotify albums of ``michael buble'' from 2014. There should be no items in both output sets.
 \item Complete: the union of the follow-up outputs completely make up the source output. Specific example: there are short, medium, and long YouTube
   videos. If the source input is for keyword ``testing'', then one can make three follow-up inputs: short ``testing'', medium ``testing'', and long ``testing''.
   Put together, the results for short, medium, and long ``testing'' videos should be the same as the results for just ``testing''.
 \item Difference: source and follow-up differ in a specific set of items $D$. Often occur in create and update operations. Specific example:
-  I upload two videos which I know to be similar except for the length and title. The create operation returns the video operations.
-  One can check that the source and follow-up only differ on items in $D$.
+  I upload two videos which I know to be similar except for the length and title. The create operation returns the video uploaded.
+  One can check that the source and follow-up output metadata only differ on items in $D$: for instance, they should have the same resolution, but may have different length and title.
 \end{itemize}
 
 \section*{Code Review}
@@ -255,20 +255,26 @@ based on the following references:
 \item how code review works in an MIT course on software construction:
 
   \url{http://web.mit.edu/6.031/www/sp17/general/code-review.html}
+\item blog post by Vadim Kravcenko on code review:
+  \url{https://vadimkravcenko.com/shorts/code-reviews/}
 \item Fog Creek code review checklist:
 
-  {\scriptsize \url{https://blog.fogcreek.com/increase-defect-detection-with-our-code-review-checklist-example/} }
+  {\scriptsize \url{https://github.com/godber/software_dev_templates_and_checklists/blob/master/code_review/fog_creek-code_review-checklist.md} }
 \end{itemize}
 
-The MIT
-offering is more comprehensive and requires students to respond to
-code reviews as well.
+The MIT course has more comprehensive coverage of code reviews; it
+requires students to respond to code reviews as well.
 
 Code review is a communication-intensive activity. A reviewer needs to 1) read
 someone else's code and 2) communicate suggestions to the author of that code.
 We sometimes think that communicating with the computer is our primary goal
 when programming, but communicating with other people is at least as important
 over the long run.
+
+From the blog post:
+\begin{quote}
+  The real problem was that no one could understand what the hell anyone else had written; we had duplicate logic in many places and different code styles in our modules. It was really bad
+\end{quote}
 
 \paragraph{Purpose of code review.} The communication inherent in code review
 aims to improve both the code itself as well as the author of the
@@ -281,7 +287,7 @@ We'll continue with a list of items that you are inspecting when you do a code r
 \paragraph{Formatting.} Consistency in formatting helps avoid preventable
 errors. Positioning of \{ \}s isn't something that necessarily has one
 right answer. Spaces are probably better than tabs. But the most important thing is
-to be self-consistent with yourself and within your project.
+to be self-consistent with yourself and within your project. Use a tool to check this.
 
 \section*{Code smell example 1.}
 

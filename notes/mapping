@@ -12,13 +12,13 @@
 11 Constraint-Based-Fuzzing-and-Property-Based-Testing
 12 Reducing-Failure-Inducing-Inputs
 14 Symbolic-Execution
-15-Bounded-Model-Checking-CBMC-and-Kani
+15 Bounded-Model-Checking-CBMC-and-Kani
 16 Dafny-Application-Cedar
 17 Dafny
 18 Kani-vs-Dafny
 19 Dafny-VC-and-Lemmas
-20-Bubblesort-in-Dafny
-21-Dafny-sequences-and-VCgen
+20 Bubblesort-in-Dafny
+21 Dafny-sequences-and-VCgen
 22 Formal-Verification-and-Software-Development
 23 Reasoning-About-Software-Quality
 24 Review
