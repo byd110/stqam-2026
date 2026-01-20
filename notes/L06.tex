@@ -115,7 +115,7 @@ From the Kravcenko blog post:
   The real problem was that no one could understand what the hell anyone else had written; we had duplicate logic in many places and different code styles in our modules. It was really bad.
 \end{quote}
 
-\paragraph{Levels of code review.} An old comment on Hacker News\footnote{\url{https://news.ycombinator.com/item?id=8862602}} says:
+\paragraph{Code review: purpose and levels.} An old comment on Hacker News\footnote{\url{https://news.ycombinator.com/item?id=8862602}} says:
 
 \begin{quote}
 From my experience doing reviews and having my code reviewed the most important thing is to understand:
@@ -142,11 +142,11 @@ There are three levels of review I typically observe:
 Of course, it depends on how big the patch being reviewed actually is. If it's really simple\footnote{e.g. \url{https://github.com/Piwigo/Piwigo/commit/c614efd33c696062aca57d5676052f4b7ab85946}},
 \#1 may well be enough. A more in-depth change merits more in-depth review.
 
-\paragraph{Purpose of code review.} The communication inherent in code review
-aims to improve both the code itself as well as the author of the
-code.  Good code review can give timely information to developers
-about the context in which their code operates,
-particularly the project and best-practices uses of the language.
+The communication inherent in code review aims to improve both the
+code itself as well as the author of the code.  Good code review can
+give timely information to developers about the context in which their
+code operates, particularly the project and best-practices uses of the
+language.
 
 \paragraph{Receiving feedback.} We usually talk about giving feedback, not receiving feedback,
 but receiving is important as well. You don't have to argue about it (or many other things).
@@ -253,8 +253,8 @@ Such comments can mislead and hence do more harm than good.
 
 \paragraph{Providing feedback.} I'm pretty convinced that, as humans,
 we would prefer not to receive feedback. Certainly it's true for me.
-Kravcenko writes ``I’ve seen quite a few times when the developers
-were demotivated for weeks after a bad review. And that’s not how it
+Kravcenko writes ``I've seen quite a few times when the developers
+were demotivated for weeks after a bad review. And that's not how it
 should go.'' And yet, there are better ways and worse ways to provide feedback;
 Kravcenko advocates for Nonviolent Code Review\footnote{\url{https://www.mediawiki.org/wiki/Nonviolent_Code_Review}}.
 
