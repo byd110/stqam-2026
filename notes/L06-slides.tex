@@ -371,6 +371,150 @@ public static List<Integer> hailstoneSequence(int n) {
   \partpage
 \end{frame}
 
+\begin{frame}[fragile]
+  \frametitle{Static and dynamic analysis}
+  \Large
+  \begin{changemargin}{2em}
+    Static analysis: \\
+    \begin{changemargin}{1em} look at the source code of a system \& infer properties (including code smells and fault detection)
+    \end{changemargin}
+    ~\\[1em]
+    Dynamic analysis:\\
+    \begin{changemargin}{1em}  look at the executions of a system \& infer properties (example: coverage)
+    \end{changemargin}
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Static analysis tools}
+  \Large
+  \begin{changemargin}{2em}
+    We'll talk about PMD (\url{pmd.github.io}).\\[1em]
+
+    Other tools exist: SpotBugs, SAST (by gitlab), clippy (for Rust), etc.\\[1em]
+
+    We said: use tools to flag style issues. \\
+    PMD can do this.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Using PMD}
+  \Large
+  \begin{changemargin}{2em}
+    Easiest: in an IDE, using built-in PMD rulesets.\\[1em]
+    PMD has rulesets for many languages, including C++, Scala, Java.\\[1em]
+    For Java: many rulesets, grouping related rules.\\[1em]
+    You can choose rules to apply for your project.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{PMD Example: SimplifyConditional\\ \qquad [design ruleset]}
+  Detect redundant null checks.
+\begin{lstlisting}[language=Java]
+class ConditionalToBeSimplified {
+  void bar(Object x) {
+    if (x != null && x instanceof Bar) {
+      // just drop the "x != null" check
+    }
+  }
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{PMD Example: UseCollectionIsEmpty\\ \qquad [design ruleset]}
+  Better to use {\tt c.isEmpty()} rather than {\tt c.size() == 0}.
+  \begin{lstlisting}[language=Java]
+class UseIsEmpty {
+    void good() {
+        List foo = getList();
+        if (foo.isEmpty()) { /* ... */ }
+    }
+
+    void bad() {
+        List foo = getList();
+        if (foo.size() == 0) { /* ... */ }
+    }
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{PMD Example: MisplacedNullCheck\\ \qquad [basic ruleset]}
+Don't check nullness after relying on non-nullness.
+  \begin{lstlisting}[language=Java]
+class RedundantNullCheck {
+    void bar() {
+      if (a.equals(baz) || a == null) {
+        // don't need to check a == null
+        /* ... */
+      }
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{PMD Example: UseNotifyAllInsteadOfNotify\\ \qquad [design ruleset]}
+Usually,
+  {\tt notifyAll()} is the right call to use, not {\tt
+    notify()}. \\
+  Unless you know what you're doing, using {\tt notify()}
+  is going to result in stuck threads, which is a bug.
+  \begin{lstlisting}[language=Java]
+class Notifier {
+    void bar() {
+      synchronized(this) {
+        // should likely be .notifyAll()
+        this.notify();
+      }
+    }
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{PMD}
+  \begin{changemargin}{2em}
+Find more about the above rules at 
+\url{https://pmd.github.io/pmd/pmd_rules_java.html}.\\[1em]
+
+We saw rules from the design and basic rulesets.\\[1em]
+
+Other rulesets:  
+specifically for JUnit; detecting empty or otherwise useless
+code; naming conventions; etc.\\[1em]
+
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Static analysis: strengths}
+  \begin{changemargin}{2em}
+  \end{changemargin}
+\end{frame}
+
+\usebackgroundtemplate{\tikz\node[opacity=0.2]{\includegraphics[width=\paperwidth, trim=0 0 0 -5em]{L06/05111_she_wolf2.jpg}};}
+\begin{frame}[fragile]
+  \frametitle{Static analysis: limitations}
+  \begin{changemargin}{2em}
+  \end{changemargin}
+\end{frame}
+\usebackgroundtemplate{}
+
+\begin{frame}[fragile]
+  \frametitle{Writing your own PMD rules}
+  \begin{changemargin}{2em}
+You can also write your own rules, via
+XPath queries or Java visitors.\\[1em]
+SemGrep 
+supposedly easier to write rules for compared to PMD: the marketing
+copy says ``Semgrep rules look like the code you already write''.
+  \end{changemargin}
+\end{frame}
+
+
 \usebackgroundtemplate{\tikz\node[opacity=0.3]{\includegraphics[width=\paperwidth]{L03/1140_monkeys.JPG}};}
 \part{Chaos Monkey}
 \begin{frame}
