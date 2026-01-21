@@ -492,6 +492,9 @@ code; naming conventions; etc.\\[1em]
 \begin{frame}[fragile]
   \frametitle{Static analysis: strengths}
   \begin{changemargin}{2em}
+    Can find security issues, e.g. uses of unsafe APIs like \texttt{gets()}.\\[1em]
+    Can write custom checkers for new vulnerabilities as they come out.\\[1em]
+    Static analysis is exhaustive; good at finding missing error handling or edge cases.
   \end{changemargin}
 \end{frame}
 
@@ -499,6 +502,10 @@ code; naming conventions; etc.\\[1em]
 \begin{frame}[fragile]
   \frametitle{Static analysis: limitations}
   \begin{changemargin}{2em}
+    Because these tools are exhaustive, they return false positives.\\[1em]
+    Interprocedural analysis is especially hard.\\[1em]
+    People ignore excessive false positives.\\[2em]
+    Tools don't substitute for human judgment in saying how important issues are.
   \end{changemargin}
 \end{frame}
 \usebackgroundtemplate{}
@@ -508,9 +515,76 @@ code; naming conventions; etc.\\[1em]
   \begin{changemargin}{2em}
 You can also write your own rules, via
 XPath queries or Java visitors.\\[1em]
-SemGrep 
+SemGrep is
 supposedly easier to write rules for compared to PMD: the marketing
 copy says ``Semgrep rules look like the code you already write''.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{On XPath}
+  \begin{changemargin}{2em}
+    Write \alert{selectors} to find nodes.\\[1em]
+    Example following: a simple XML document.\\[1em]
+    Other applications of XPath: web programming (Document Object Model); and, also, Java code (PMD).
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Example XML file}
+\begin{lstlisting}[language=XML]
+<?xml version="1.0" encoding="UTF-8"?>
+
+<bookstore>
+ <book>
+  <title lang="fr">Harry Potter</title>
+  <price>29.99</price>
+ </book>
+ <book>
+  <title lang="en">Learning XML</title>
+  <price>39.95</price>
+ </book>
+</bookstore>
+\end{lstlisting}
+
+(Play along at \url{https://www.w3schools.com/xml/tryit.asp?filename=try_xpath_select_cdnodes}.)
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Three Queries}
+    \begin{changemargin}{2em}
+      XPath expression: {\tt //price}\\
+      Result: set of \verb+<price>+ nodes with data {\tt 29.99}, {\tt
+        39.95}.\\[1em]
+
+      {\tt //} means any descendants (including self) of the context node (= root node, here).\\[1em]
+
+      XPath expression: {\tt count(//price)}\\
+      Result: 2.\\[1em]
+
+      XPath expression: {\tt /bookstore/book[1]/title}\\
+      Result: {\tt Harry Potter}.\\
+      If we omitted {\tt [1]}, then we'd get all of the titles.\\[1em]
+      
+    \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Predicates}
+  \begin{changemargin}{2em}
+      XPath: {\tt /bookstore/book[price>35]/title}\\
+      Result: titles of books with price greater than 35.\\[1em]
+
+      Can put arbitrary tree queries in []s.\\[1em]
+
+      XPath: {\tt //price[../title[text()="Learning XML"]]}.\\
+      XPath: {\tt //title[../price < 35 or @lang="en"]}. \\[1em]
+      
+      {\tt *} works as you might expect.\\[1em]
+
+{\tt //} includes descendants and self.\\
+For descendants excluding self, write 
+e.g. {\tt descendant::book}.
   \end{changemargin}
 \end{frame}
 
