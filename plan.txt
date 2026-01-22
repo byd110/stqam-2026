@@ -24,7 +24,7 @@ https://docs.gitlab.com/user/application_security/sast/evaluation_guide/
 
 3 weeks fuzzing (L03)
 
-*_ L07 intro to fuzzing / address sanitizer
+** L07 intro to fuzzing / address sanitizer
 *_ L08 mutation-based fuzzing
 __ L09 grammar-based fuzzing (https://www.fuzzingbook.org/html/Grammars.html)
 __ L10 fuzzing APIs (https://www.fuzzingbook.org/html/APIFuzzer.html)
