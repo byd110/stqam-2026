@@ -86,9 +86,9 @@ principles behind it, though this lecture misses some important afl components (
 % afl and grammars: https://lcamtuf.blogspot.com/2015/01/afl-fuzz-making-up-grammar-with.html
 
 \section*{Mutation-based fuzzing}
-In mutation-based fuzzing (confusingly named, but not at all the same as mutation analysis), you use/develop a tool that randomly modifies existing
+Mutation-based fuzzing (confusingly named, but not at all the same as mutation analysis) is where you randomly modify existing
 inputs. The Fuzzinator experience report we mentioned last time was mutation-based fuzzing. You could do this totally randomly by flipping bytes in the input,
-or you could parse the input and then change some of the nonterminals.
+or at a higher level, you could parse the input and then change some of the nonterminals.
 If you flip bytes, you also need to update any applicable
 checksums if you want to see anything interesting.
 
@@ -160,7 +160,7 @@ If we do want a more dense set of valid inputs, there are basically two things w
 inputs, or use a grammar to generate inputs. (As a variant of generating with a grammar, one can also parse an input with the grammar, mutate the parse tree, and unparse.)
 We'll talk about mutating inputs, or mutational fuzzing.
 
-Today's code is in the repo in the \texttt{L08/mutation\_fuzzer.py} file.
+Today's code is in the repo in the \texttt{code/L08/} directory; the code here is in \texttt{mutation\_fuzzer.py}.
 
 When our input is a string, then we can insert a random character, delete a character, or change an existing
 character.
@@ -335,7 +335,7 @@ print(mutation_fuzzer.fuzz())
 print(mutation_fuzzer.fuzz())
 print(mutation_fuzzer.fuzz())
 \end{lstlisting}
-and we get the seed first and then its mutations, most of which aren't valid URLs---but more are valid than when we took randomly-generated strings.
+and we get the seed first and then its mutations, most of which aren't valid URLs---but more are valid than when we took entirely randomly-generated strings.
 
 \section*{Hierarchies}
 Before we started talking about mutation, we were generating pretty much purely-random inputs and fed them to
@@ -383,6 +383,9 @@ Time to introduce a new idea---one that has been made popular in practice by AFL
 We've previously talked about coverage in terms of evaluating how good a test suite is.
 Now, we're going to use coverage to guide test generation. Using coverage to guide test generation
 is known as \emph{greybox} fuzzing: it uses some information about the system, but less than whitebox fuzzing.
+
+Why greybox? Blackbox: don't look at the implementation at all; whitebox; use the implementation to guide testing;
+greybox: in between.
 
 There are more technical details about AFL here: \url{https://github.com/mirrorer/afl/blob/master/docs/technical_details.txt}.
 
@@ -440,10 +443,10 @@ gives a list of program points, which are function/line tuples.
 Now, the idea is to add an input to the population of source inputs whenever that input adds to coverage.
 The mutation fuzzer mutates inputs in the population to generate new candidate inputs.
 
-In Python, we can just measure coverage using built-in language features.
+(In Python, we can just measure coverage using built-in language features.
 From what I understand, the preferred mode of operation for AFL is to take the assembly code generated
 by the compiler and to add instrumentation to record coverage information---in particular, branch counts.
-AFL can also collect coverage information from a virtual machine (QEMU) or dynamic instrumentation (Pintools.
+AFL can also collect coverage information from a virtual machine (QEMU) or dynamic instrumentation (Pintools)).
 
 \begin{lstlisting}[language=Python]
 class MutationCoverageFuzzer(MutationFuzzer):
@@ -463,7 +466,6 @@ class MutationCoverageFuzzer(MutationFuzzer):
         result, outcome = super().run(runner)
         new_coverage = frozenset(runner.coverage())
         if outcome == Runner.PASS and new_coverage not in self.coverages_seen:
-            # We have new coverage
             self.population.append(self.inp)
             self.coverages_seen.add(new_coverage)
 
@@ -483,8 +485,8 @@ valid inputs.
 \end{verbatim}
 }
 
-We need additional machinery to see how coverage over time
-increases using this strategy, and there's a plot of that
+We need additional machinery to see how coverage
+increases over time using this strategy, and there's a plot of that
 in the \emph{Fuzzing Book}, but maybe you can take my word for it.
 
 \paragraph{Exercise.} How does \texttt{MutationCoverageFuzzer.runs()} work?
@@ -497,7 +499,7 @@ The API to \texttt{MutationCoverageFuzzer} (MCF) is the \texttt{runs()} method; 
 The inherited implementation, from \texttt{Fuzzer}, calls \texttt{self.run()} $N$ times.
 
 Then, MCF\texttt{.run()} does one superclass call to \texttt{MutationFuzzer.run()} to run on some input $i$
-that the \texttt{MutationFuzzer} generates. If $i$ leads to new coverage (not in \texttt{.coverages\_seen}), MCF adds $i$ to the \texttt{.population}.
+that the \texttt{MutationFuzzer} generates. If $i$ leads to new coverage (i.e., not in \texttt{.coverages\_seen}), MCF adds $i$ to the \texttt{.population}.
 
 The \texttt{MutationFuzzer} uses the \texttt{.population} to generate new inputs by fuzzing something drawn randomly from there.
 But, until the seeds are used up, it starts by returning the seeds as the first inputs---on they way, the seeds would get added to the
@@ -712,8 +714,8 @@ We can compare this counting greybox fuzzer to the original. Nothing special her
     fast_fuzzer.runs(FunctionCoverageRunner(crashme), trials=n)
     end = time.time()
 
-    print ("It took the fuzzer w/ exponential schedule %0.2f seconds to generate and execute %d inputs." % (end - start, n))
-    _, counting_greybox_coverage = population_coverage(fast_fuzzer.inputs, crashme)
+    print ("fuzzer w/ exponential schedule: %0.2fs for %d inputs." % (end - start, n))
+    _, counting_greybox_coverage=population_coverage(fast_fuzzer.inputs, crashme)
     cgb_max_coverage = max(counting_greybox_coverage)
     print ("Our fuzzer w/exponential schedule covers %d statements." % (cgb_max_coverage))
     print("             path id 'p'           : path frequency 'f(p)'")
@@ -726,21 +728,21 @@ We can compare this counting greybox fuzzer to the original. Nothing special her
     orig_fuzzer.runs(FunctionCoverageRunner(crashme), trials=n)
     end = time.time()
 
-    print ("It took the fuzzer w/ original schedule %0.2f seconds to generate and execute %d inputs." % (end - start, n))
+    print ("fuzzer w/ original schedule: %0.2fs for %d inputs." % (end-start, n))
     print("             path id 'p'           : path frequency 'f(p)'")
     print (orig_schedule.path_frequency)
 \end{python}
 Running this a few times, I observed that the exponential schedule is often a bit slower than the original schedule, but it also
 more consistently hits 5 statements/paths, with a decent number of hits to the fifth statement. When the original schedule hits
 the fifth statement, the count for that statement is sometimes as low as 4.
-{\small \begin{verbatim}
-It took the fuzzer w/ exponential schedule 0.46 seconds to generate and execute 10000 inputs.
+{\scriptsize \begin{verbatim}
+fuzzer w/ exponential schedule: 0.46s for 10000 inputs.
 Our fuzzer w/exponential schedule covers 5 statements.
              path id 'p'           : path frequency 'f(p)'
 {'26b4becfdd3a8aacb81607a627bd1854': 5468, 'bc2fa870f15bb877d04c81e7bef87bac': 2694,
  '6f2492ce0367e22be7f8327c8e333853': 1119, 'f7b00fe99a9c688bbd30df9e747557a8': 452,
  '8669eeece2269c362bfa8d147565bbb5': 267}
-It took the fuzzer w/ original schedule 0.30 seconds to generate and execute 10000 inputs.
+fuzzer w/ original schedule: 0.30s for 10000 inputs.
              path id 'p'           : path frequency 'f(p)'
 {'26b4becfdd3a8aacb81607a627bd1854': 7538, 'bc2fa870f15bb877d04c81e7bef87bac': 2121,
  '6f2492ce0367e22be7f8327c8e333853': 327, 'f7b00fe99a9c688bbd30df9e747557a8': 14}
@@ -773,7 +775,7 @@ def my_parser(inp:str) -> None:
 \end{python}
 
 Starting with $n = 5000$ and a single seed input containing one space (see \texttt{code/L08/fuzz\_htmlparser.py}):
-{\small \begin{verbatim}
+{\scriptsize \begin{verbatim}
 It took all three fuzzers 14.77 seconds to generate and execute 5000 inputs.
 Maximum coverages: 65, 165, 168.
 Last 10 blackbox:

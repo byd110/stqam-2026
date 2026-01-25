@@ -100,7 +100,7 @@ do, else, case, break},
     Goal: generate many test cases automatically.\\[1em]
     When we talked about helping human oracles,\\
     we mentioned starting from known inputs.\\[1em]
-    \alert{Mutation-based fuzzing}: automatically modify known inputs.
+    \alert{Mutation-based fuzzing}: generate new inputs automatically, by modifying known inputs.
   \end{changemargin}
 \end{frame}
 
@@ -150,7 +150,7 @@ Let's use fuzzing to generate valid and invalid URLs.
 \end{verbatim}
 \end{center}
 ~\\[1em]
-There are a fixed number of valid \texttt{scheme}s:
+There are a fixed number of valid \texttt{scheme}s, defined in the RFC:
 \texttt{http}, \texttt{https}, \texttt{file}, etc.
 
   \end{changemargin}
@@ -161,7 +161,7 @@ There are a fixed number of valid \texttt{scheme}s:
 
   \small
   \begin{changemargin}{2em}
-\begin{lstlisting}[language=Python]
+\begin{python}
 >>> from typing import Tuple, List
 >>> from typing import Callable, Set, Any
 >>> from urllib.parse import urlparse
@@ -170,7 +170,7 @@ There are a fixed number of valid \texttt{scheme}s:
 ParseResult(scheme='http', netloc='www.google.com',
   path='/search', params='',
   query='q=fuzzing', fragment='')
-\end{lstlisting}
+\end{python}
   \end{changemargin}
 \end{frame}
 
@@ -228,7 +228,7 @@ Basically, this fuzzing won't test anything past validation.
     \item generate inputs using a grammar.
     \end{itemize}
     ~\\[1em]
-    (As mentioned earlier, can also parse/mutate/unparse).
+    (As mentioned earlier, can also parse/mutate/unparse: higher-level mutation).
   \end{changemargin}
 \end{frame}
 
@@ -306,6 +306,7 @@ def mutate(s: str) -> str:
 for i in range(10):
     print(repr(mutate("A quick brown fox")))
   \end{python}
+  ~\\ (\texttt{code/L08/mutator.py})
 \end{frame}
 
 \begin{frame}[fragile]
@@ -323,7 +324,10 @@ def is_valid_url(url: str) -> bool:
 assert is_valid_url("http://www.google.com/search?q=fuzzing")
 assert not is_valid_url("xyzzy")
   \end{python}
-  Easier to test with this wrapper.
+  {\Large \begin{changemargin}{2em}
+      Easier to test with this wrapper: \\
+      wrapper returns \texttt{True}/\texttt{False}.
+    \end{changemargin}}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -343,7 +347,9 @@ for i in range(trials):
 
 print (len(valid_inputs)/trials)
   \end{python}
-  What do you observe when you run this?
+  \begin{changemargin}{2em}
+    \Large What do you observe when you run this?
+  \end{changemargin}
 \end{frame}
 
 \begin{frame}
@@ -351,17 +357,16 @@ print (len(valid_inputs)/trials)
 
   \Large
   \begin{changemargin}{2em}
-    How long should you expect to wait before randomly mutating \texttt{http} to \texttt{https}
-    and getting a valid input?
+    How many trials to expect before randomly mutating \texttt{http} to get \texttt{https}?
   \end{changemargin}
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Multiple mutations}
+  \frametitle{Applying multiple mutations to one input}
 
   \Large
   \begin{changemargin}{2em}
-  Not for mutation analysis, but useful here.
+  Not for mutation analysis, but critical for mutation fuzzing.
 
 \begin{python}
 seed_input = "http://www.google.com/search?q=fuzzing"
@@ -508,7 +513,7 @@ Operate at all the levels.
   \Large
   \begin{changemargin}{2em}
     So far: use coverage to evaluate test suites.\\[1em]
-    New: use coverage to guide test generation (greybox fuzzing, AFL).
+    New: \alert{greybox fuzzing} = use coverage to guide test generation (used in AFL, with some more twists).
   \end{changemargin}
 \end{frame}
 \usebackgroundtemplate{}
@@ -636,15 +641,28 @@ prints a slice of the coverage:
 \end{frame}
 
 \begin{frame}
-  \frametitle{Putting the AFL Idea into Practice}
+  \frametitle{Putting the AFL Idea into Practice: Greybox Fuzzing}
 
   \Large
   \begin{changemargin}{2em}
     Maintain a population of source inputs.\\[1em]
-    Add an input to the population when the input adds to coverage.\\[1em]
-    The mutation fuzzer (from Part I) mutates inputs in the population to generate new candidate inputs.
+    The mutation fuzzer (from Part I) mutates inputs in the population to generate new candidate inputs and always adds them.\\[1em]
+    \alert{Greybox Fuzzing}: Add an input to the population when that input adds to coverage.\\[1em]
   \end{changemargin}
 \end{frame}
+
+\usebackgroundtemplate{\tikz\node[opacity=0.3]{\includegraphics[width=\paperwidth]{L08/20190324_095746174_boxes.jpg}};}
+\begin{frame}
+  \frametitle{Why greybox?}
+
+  \Large
+  \begin{changemargin}{2em}
+    Blackbox: don't look at the implementation at all.\\[1em]
+    Whitebox: use the implementation to guide testing.\\[1em]
+    Greybox: use coverage to guide testing, but don't look at the implementation itself.
+  \end{changemargin}
+\end{frame}
+\usebackgroundtemplate{}
 
 \begin{frame}[fragile]
   \frametitle{\texttt{MutationCoverageFuzzer} implementation}
@@ -663,7 +681,6 @@ class MutationCoverageFuzzer(MutationFuzzer):
         result, outcome = super().run(runner)
         new_coverage = frozenset(runner.coverage())
         if outcome == Runner.PASS and new_coverage not in self.coverages_seen:
-            # We have new coverage
             self.population.append(self.inp)
             self.coverages_seen.add(new_coverage)
 
@@ -681,7 +698,7 @@ if __name__ == "__main__":
     mutation__coverage_fuzzer.runs(urlconsumer_runner, trials=10000)
     print (mutation_fuzzer.population)
   \end{python}
-  We aim to increase coverage of \texttt{url\_consumer} and functions it calls.
+  We aim to increase coverage of \texttt{url\_consumer} and the functions it calls.
   The population after 10,000 trials:
   {\scriptsize
     \begin{verbatim}
@@ -784,8 +801,8 @@ Blackbox mutation-based fuzzer: max coverage 2.
 \begin{frame}[fragile]
   \frametitle{Adding Greybox: Results}
   \begin{changemargin}{2em}
-    You'll find \texttt{GreyboxFuzzer} in the repo also.
-    \small
+{\Large    You'll find \texttt{GreyboxFuzzer} in the repo also.\\[1em]}
+
 \begin{verbatim}
 Blackbox mutation-based: 0.65s for 30000 inputs.
 Blackbox mutation-based fuzzer: max coverage 2.
@@ -795,7 +812,8 @@ Greybox mutation-based fuzzer: 3 more.
 [good, bgod, bao]Cd, badS, bad!]
 \end{verbatim}
 
-That's promising: it reaches otherwise-unlikely nested branches.
+~\\
+{\Large That's promising: it reaches otherwise-unlikely nested branches.}
   \end{changemargin}
 \end{frame}
 
@@ -825,7 +843,7 @@ That's promising: it reaches otherwise-unlikely nested branches.
 \usebackgroundtemplate{}
 
 \begin{frame}
-  \frametitle{AFL does a bit more still}
+  \frametitle{AFL does a bit more than we've said so far}
 
   \Large
   \begin{changemargin}{2em}
@@ -878,6 +896,7 @@ class PowerSchedule:
   \begin{changemargin}{0em}
     \small
 \begin{python}
+if __name__ == "__main__":
     population = [Seed("A"), Seed("B"), Seed("C")]
     schedule = PowerSchedule()
     hits = { "A": 0, "B": 0, "C": 0 }
@@ -1001,6 +1020,7 @@ fuzzer w/ original schedule 0.30s for 10000 inputs.
  '6f...3853': 327,  'f7...57a8': 14}
 \end{verbatim}
 }
+~\\
 Exponential is a bit slower than original, but more consistently hits 5 paths.
 Original schedule has low count for 5th path.
   \end{changemargin}
@@ -1023,6 +1043,7 @@ original schedule:
 'f7b00fe99a9c688bbd30df9e747557a8', 0.25000, 'badN g6poodP'
 \end{verbatim}
 }
+~\\
 Unusual path gets the vast majority of the energy under fast schedule; \\
  all paths have same energy under the original schedule.
   \end{changemargin}

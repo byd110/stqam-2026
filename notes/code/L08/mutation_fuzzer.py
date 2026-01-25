@@ -83,11 +83,22 @@ class MutationFuzzer(Fuzzer):
 
 
 def main():
+    from random_inputs import is_valid_url
     seed_input = "http://www.google.com/search?q=fuzzing"
     mutation_fuzzer = MutationFuzzer(seed=[seed_input])
+
     print(mutation_fuzzer.fuzz())
     print(mutation_fuzzer.fuzz())
     print(mutation_fuzzer.fuzz())
+
+    valid_inputs = set()
+    trials = 20
+    for i in range(trials):
+        inp = mutation_fuzzer.mutate(seed_input)
+        if is_valid_url(inp):
+            valid_inputs.add(inp)
+
+    print (len(valid_inputs)/trials)
 
 if __name__ == "__main__":
     main()

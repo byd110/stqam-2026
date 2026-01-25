@@ -42,6 +42,8 @@ class Mutator:
         return mutator(inp)
 
 def main():
+    for i in range(10):
+        print (repr(Mutator().mutate("A quick brown fox")))
     print (Mutator().mutate("good"))
 
 if __name__ == "__main__":

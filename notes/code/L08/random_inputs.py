@@ -14,6 +14,13 @@ def url_consumer(url: str) -> bool:
     # Do something with the URL
     return True
 
+def is_valid_url(url:str) -> bool:
+    try:
+        result = url_consumer(url)
+        return True
+    except ValueError:
+        return False
+
 def main():
     for i in range(1000):
         try:
