@@ -169,8 +169,8 @@ This is grammar fuzzing. We can also carry out grammar fuzzing for the expressio
 \begin{enumerate}[noitemsep]
 \item Once again, start at \brac{start}.
 \item There is one alternative, which is \brac{expr}. Visit \brac{expr}.
-\item \brac{expr} can be three things. Randomly choose \brac{term} \texttt{+} \brac{expr}. Visit \brac{term},
-  with \texttt{+} and \brac{expr} still to generate.
+\item \brac{expr} can be three things. Randomly choose \brac{term} \texttt{+} \brac{expr} and replace the original \brac{expr} by the chosen alternative.
+\item Visit \brac{term}, with \texttt{+} and \brac{expr} still in our input being generated.
 \item There are also 3 alternatives for \brac{term}. Randomly choose \brac{factor}.
 \item Of the 5 alternatives for \brac{factor}, choose \brac{integer}.
 \item There are 2 alternatives at \brac{integer}. Choose \brac{digit}.
@@ -461,7 +461,7 @@ Finally, there is a utility function \texttt{trim\_grammar()} and a validation f
 \texttt{trim\_grammar()} returns a semantically-equivalent grammar to what you passed in, without
 unneeded expansions, while \texttt{is\_valid\_grammar()} does semantic checks on a grammar.
 
-\subsection{Applications of Grammars in Testing}
+\subsection*{Applications of Grammars in Testing}
 The \emph{Fuzzing Book} lists some projects using grammar-based fuzzing, principally for compiler testing and also web browsers.
 The earliest citation they have is for work by Burkhardt in 1967~\cite{burkhardt67:_gener} which claims to automatically generate
 programs from grammars.

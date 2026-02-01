@@ -76,6 +76,7 @@ do, else, case, break},
   }% 
   \item[]}{\end{list}}
 
+\newcommand{\brac}[1]{\texttt{\textless #1\textgreater}}
 
 
 \begin{document}
@@ -85,21 +86,583 @@ do, else, case, break},
 \end{frame}
 
 \usebackgroundtemplate{\tikz\node[opacity=0.3]{\includegraphics[width=\paperwidth]{L09/20221207_043128075_auckland_grammar_school.jpg}};}
-\part{Grammar-Based Fuzzing}
+\part{Intro: Grammar-Based Fuzzing}
 \begin{frame}
   \partpage
 \end{frame}
 \usebackgroundtemplate{}
 
 \begin{frame}
-  \frametitle{Putting things together}
+  \frametitle{Types of Fuzzing}
 
   \Large
   \begin{changemargin}{2em}
     Goal: generate many test cases automatically.\\[1em]
-    When we talked about helping human oracles,\\
-    we mentioned starting from known inputs.\\[1em]
-    \alert{Mutation-based fuzzing}: generate new inputs automatically, by modifying known inputs.
+    Mutation-based fuzzing: generate new inputs automatically, by modifying known inputs.\\[1em]
+    \alert{Grammar-based fuzzing}: generate new inputs automatically, using a grammar.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Example: Regular expression}
+
+  \Large
+  \begin{changemargin}{2em}
+    \begin{center}
+\begin{verbatim}
+  ^4[0-9]{12}(?:[0-9]{3})?$
+\end{verbatim}
+    \end{center}
+~\\
+Uses:
+\begin{itemize}
+\item check if a number is valid
+\item \alert{generate} numbers of the right shape
+\end{itemize}
+But: also must satisfy checksum rules!
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Checksum rules for credit card numbers}
+
+  \Large
+  \begin{changemargin}{1em}
+    Luhn algorithm: \\
+    \qquad calculate a checksum from all-but-last digits;\\
+    \qquad the last digit must match the checksum.\\[1em]
+    Can't specify checksum rules as regexp or context-free grammars.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Example (standard): expressions}
+
+  \Large
+  \begin{changemargin}{2em}
+    Context-free grammars (CFGs):
+  \end{changemargin}
+    \small
+\begin{verbatim}
+<start>   ::= <expr>
+<expr>    ::= <term> + <expr> | <term> - <expr> | <term>
+<term>    ::= <term> * <factor> | <term> / <factor>
+          |   <factor>
+<factor>  ::= +<factor> | -<factor> | (<expr>) | <integer>
+          |   <integer>.<integer>
+<integer> ::= <digit><integer> | <digit>
+<digit>   ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+\end{verbatim}
+
+  \Large
+  \begin{changemargin}{2em}
+    Can also recognize and generate strings for CFGs.
+  \end{changemargin}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Generating from grammars}
+
+  \Large
+  \begin{changemargin}{2em}
+    What we're doing in this lecture:\\
+    \qquad generating (trees and) strings\\
+    \qquad from grammars.\\[1em]
+    These are more interesting than random sequences of characters;\\
+    they test behaviour beyond input validation.\\[1em]
+    Aim: create grammars that specify all legal inputs.\\[1em]
+    Other uses: configs, APIs, GUIs, etc.
+  \end{changemargin}
+\end{frame}
+
+\usebackgroundtemplate{\tikz\node[opacity=0.3]{\includegraphics[width=\paperwidth]{L09/20221207_043128075_auckland_grammar_school.jpg}};}
+\part{Generating from CFGs}
+\begin{frame}
+  \partpage
+\end{frame}
+\usebackgroundtemplate{}
+
+
+\begin{frame}[fragile]
+  \frametitle{Expressiveness}
+
+  \Large
+  \begin{center}
+    \includegraphics[width=.6\textwidth]{L09/html.png}
+  \end{center}
+  \begin{changemargin}{2em}
+    Regexps can't count (so no HTML parsers).\\
+    CFGs can't implement Luhn algorithm.
+  \end{changemargin}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Generating Inputs}
+
+  \Large
+  \begin{changemargin}{2em}
+    How to generate inputs from this grammar?\\[1em]
+\begin{verbatim}
+<start> ::= <digit><digit>
+<digit> ::= 0 | 1 | 2 | 3 | 4
+        |   5 | 6 | 7 | 8 | 9
+\end{verbatim}
+~\\
+(Could be expressed as a regexp).
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Generating Inputs: double-digits}
+
+  \Large
+  \begin{changemargin}{2em}
+    \begin{itemize}
+      \item \brac{start} $\rightarrow$ \brac{digit}\brac{digit}
+      \item visit first \brac{digit}, have 10 choices; \\
+        choose randomly, say \texttt{1};\\
+        replace \brac{digit} by \texttt{1}.
+      \item visit second \brac{digit}, \\ choose say \texttt{7} randomly;\\
+        replace \brac{digit} by \texttt{7}.
+      \item generated input: \texttt{17}
+    \end{itemize}
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Generating Inputs: back to expr}
+
+  \Large
+  \begin{changemargin}{2em}
+  \end{changemargin}
+    \small
+\begin{verbatim}
+<start>   ::= <expr>
+<expr>    ::= <term> + <expr> | <term> - <expr> | <term>
+<term>    ::= <term> * <factor> | <term> / <factor>
+          |   <factor>
+<factor>  ::= +<factor> | -<factor> | (<expr>) | <integer>
+          |   <integer>.<integer>
+<integer> ::= <digit><integer> | <digit>
+<digit>   ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+\end{verbatim}
+
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Generating Inputs: expr}
+
+  \begin{changemargin}{2em}
+    \begin{itemize}
+      \item \brac{start} $\rightarrow$ \brac{expr}
+      \item visit \brac{expr};
+        three \brac{expr} alternatives, \\
+        randomly choose \brac{term} + \brac{expr}, \\
+        replace \brac{expr} by our choice.
+      \item visit \brac{term}; 
+        also three \brac{term} alternatives,\\
+        randomly choose \brac{factor}.
+      \item visit \brac{factor}; \\
+        randomly choose \brac{integer} of the 5 alternatives.
+      \item visit \brac{integer};
+        randomly choose \brac{digit};
+      \item visit \brac{digit};\\
+        randomly choose terminal \texttt{4} and generate it.
+      \item continue with next nonterminal \texttt{expr} \ldots
+    \end{itemize}
+    Could generate, for instance, \texttt{4 + 22 * 5.3}, or many other expressions.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Coding Things Up: Grammars in Python}
+
+  \Large
+  \begin{changemargin}{2em}
+    Just use Python data structures.\\[1em]
+
+    Grammar = mapping from an alternative's LHS to its RHS.\\
+    Here is a single-production grammar.
+\begin{python}
+DIGIT_GRAMMAR = {
+  "<start>":
+    ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+}
+\end{python}
+
+Nonterminals in  \brac{brackets}.\\
+All else taken as terminals.\\[1em]
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Python Type Hint for Grammars}
+
+  \Large
+  \begin{changemargin}{2em}
+\begin{python}
+from typing import Dict, List
+type Expansion = str
+type Grammar = Dict[str, List[Expansion]]
+\end{python}
+
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Expression Grammar in Python}
+
+  \Large
+  \begin{changemargin}{1em}
+\begin{python}
+EXPR_GRAMMAR: Grammar = {
+    "<start>":
+        ["<expr>"],
+    "<expr>":
+        ["<term> + <expr>", "<term> - <expr>", "<term>"],
+    "<term>":
+        ["<factor> * <term>",
+         "<factor> / <term>", "<factor>"],
+    "<factor>":
+        ["+<factor>", "-<factor>",
+         "(<expr>)",
+         "<integer>.<integer>", "<integer>"],
+    "<integer>":
+        ["<digit><integer>", "<digit>"],
+    "<digit>":
+        ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+  }
+\end{python}
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Playing with Grammars}
+
+  \Large
+  \begin{changemargin}{1em}
+\begin{python}
+>>> EXPR_GRAMMAR["<digit>"]
+['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+>>> "<integer>" in EXPR_GRAMMAR
+True
+\end{python}
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Conventions and Helpers}
+
+  \Large
+  \begin{changemargin}{1em}
+    Must always have start symbol \brac{start}:
+    \begin{python}
+START_SYMBOL = "<start>"
+    \end{python}
+
+    Non-terminals always in \brac{brackets}:
+    \begin{python}
+import re
+RE_NONTERMINAL = re.compile(r'(<[^<> ]*>)')
+def nonterminals(expansion):
+    if isinstance(expansion, tuple):
+        # can be a tuple, use first element
+        expansion = expansion[0]
+
+    return RE_NONTERMINAL.findall(expansion)
+
+def is_nonterminal(s):
+    return RE_NONTERMINAL.match(s)
+\end{python}
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Using these Utilities}
+
+  \Large
+  \begin{changemargin}{1em}
+\begin{python}
+>>> nonterminals("<term> * <factor>")
+["<term>", "<factor>"]
+>>> is_nonterminal("<symbol-1>")
+<re.Match object; span=(0, 10), match='<symbol-1>'>
+>>> is_nonterminal("<symbol-1")
+>>>
+\end{python}
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{A Simple Grammar Fuzzer}
+
+  \Large
+\begin{python}
+def simple_grammar_fuzzer(grammar: Grammar, 
+                          start_symbol: str = START_SYMBOL,
+                          max_nonterminals: int = 10,
+                          max_expansion_trials: int = 100,
+                          log: bool = False) -> str:
+ """Produce a string from `grammar`.
+   `start_symbol`: use a start symbol other than `<start>` (default).
+   `max_nonterminals`: the maximum number of nonterminals 
+     still left for expansion
+   `max_expansion_trials`: maximum # of attempts to produce a string
+   `log`: print expansion progress if True"""
+\end{python}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{It's all strings: implementation}
+
+  \Large
+\begin{python}
+  term = start_symbol
+  expansion_trials = 0
+  while len(nonterminals(term)) > 0:
+    symbol_to_expand = random.choice(nonterminals(term))
+    expansions = grammar[symbol_to_expand]
+    expansion = random.choice(expansions)
+    new_term = term.replace(symbol_to_expand, expansion, 1)
+
+    if len(nonterminals(new_term)) < max_nonterminals:
+        term = new_term
+        expansion_trials = 0
+    else:
+        expansion_trials += 1
+        if expansion_trials >= max_expansion_trials:
+            raise ExpansionError("Cannot expand " + repr(term))
+
+  return term
+\end{python}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Comments on Simple Grammar Fuzzer}
+
+  \Large
+  \begin{changemargin}{1em}
+    \begin{itemize}
+    \item takes a string, finds a nonterminal, replaces with an alternative.
+    \item it's all string replacement.
+    \item tree manipulations would be better; stay tuned.
+      \item there are some limits to help w/termination.
+    \end{itemize}
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Grammar: CGI}
+\begin{python}
+CGI_GRAMMAR: Grammar = {
+    "<start>":
+        ["<string>"],
+    "<string>":
+        ["<letter>", "<letter><string>"],
+    "<letter>":
+        ["<plus>", "<percent>", "<other>"],
+    "<plus>":
+        ["+"],
+    "<percent>":
+        ["%<hexdigit><hexdigit>"],
+    "<hexdigit>":
+        ["0", "1", "2", "3", "4", "5", "6", "7",
+            "8", "9", "a", "b", "c", "d", "e", "f"],
+    "<other>":  # Actually, could be _all_ letters
+        ["0", "1", "2", "3", "4", "5", "a", "b", "c", "d", "e", "-", "_"],
+}
+\end{python}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Generating CGI strings}
+  \Large
+\begin{python}
+>>> for i in range(10):
+...     print(simple_grammar_fuzzer(grammar=CGI_GRAMMAR, max_nonterminals=10))
+... 
+%e5
++
++3
+_1a
+e+
+%625%ee
+%db%df%5d
++44
+%4b
++%b8+2
+\end{python}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Grammar: URL}
+  \begin{python}
+URL_GRAMMAR: Grammar = {
+    "<start>": ["<url>"],
+    "<url>": ["<scheme>://<authority><path><query>"],
+    "<scheme>": ["http", "https", "ftp", "ftps"],
+    "<authority>":
+        ["<host>", "<host>:<port>",
+         "<userinfo>@<host>", "<userinfo>@<host>:<port>"],
+    "<host>":  # Just a few
+        ["patricklam.ca", "www.google.com", "fuzzingbook.com"],
+    "<port>": ["80", "8080", "<nat>"],
+    "<nat>": ["<digit>", "<digit><digit>"],
+    "<digit>":
+        ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+    "<userinfo>":  # Just one
+        ["user:password"],
+    "<path>":  # Just a few
+        ["", "/", "/<id>"],
+    "<id>": ["abc", "def", "x<digit><digit>"],
+    "<query>": ["", "?<params>"],
+    "<params>": ["<param>", "<param>&<params>"],
+    "<param>": ["<id>=<id>", "<id>=<nat>"],
+}
+  \end{python}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Generating URLs}
+  \Large
+\begin{python}
+>>> for i in range(10):
+...     print(simple_grammar_fuzzer(grammar=URL_GRAMMAR, max_nonterminals=10))
+...     
+https://user:password@www.google.com/abc
+http://user:password@fuzzingbook.com/
+http://user:password@patricklam.ca/def?x97=60
+ftp://user:password@fuzzingbook.com/x60?abc=def
+https://patricklam.ca/?x84=31&x95=x12
+ftp://www.google.com:1/abc
+ftp://user:password@fuzzingbook.com:80/x40?def=6&x12=abc
+ftp://user:password@www.google.com
+http://user:password@fuzzingbook.com/def?x35=1
+ftp://user:password@www.google.com/abc
+\end{python}
+\begin{changemargin}{2em}
+  This isn't all URLs, but we do get better coverage of our chosen subset.\\
+  Other examples possible, e.g. book titles (see \emph{Fuzzing Book}).
+\end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{On Validity}
+\begin{changemargin}{2em}
+  If you have a grammar, \\
+  \qquad you can generate strings belonging to the grammar \\
+  \qquad (as we've seen).\\[1em]
+  These strings, by definition, always satisfy the grammar.\\[1em]
+  They may not be valid inputs to a program.\\
+  \begin{itemize}
+  \item e.g. port number between 1024 and 2048;
+  \item e.g. checksum digit satisfies Luhn's algorithm.
+  \end{itemize}
+  ~\\
+  Can attach constraints to grammars to generate more-valid inputs, or weight some alternatives more heavily (not discussed today).
+\end{changemargin}
+\end{frame}
+
+\usebackgroundtemplate{\tikz\node[opacity=0.2]{\includegraphics[width=\paperwidth]{L09/20231126_224046664_seed_passionflowers_v1.jpg}};}
+\begin{frame}
+  \frametitle{Grammars \& Mutation Seeds}
+  \Large
+\begin{changemargin}{2em}
+  So far: only produce syntactically valid inputs.\\[1em]
+  What about \emph{invalid} inputs?\\[1em]
+  One answer: \alert{mutation}.\\[1em]
+  Our \texttt{MutationFuzzer} accepts seeds to start from.
+\end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Generating CGI strings}
+  \Large
+\begin{python}
+number_of_seeds = 10
+seeds = [
+    simple_grammar_fuzzer(
+        grammar=URL_GRAMMAR,
+        max_nonterminals=10) for i in range(number_of_seeds)]
+seeds
+m = MutationFuzzer(seeds)
+[m.fuzz() for i in range(20)]
+\end{python}
+\begin{changemargin}{2em}
+  Use the grammar fuzzer to produce seeds,\\
+  then the mutation fuzzer to mutate them.
+\end{changemargin}
+\end{frame}
+
+\usebackgroundtemplate{}
+
+\begin{frame}[fragile]
+  \frametitle{EBNF}
+  \begin{changemargin}{2em}
+    Extended Backus-Naur form; is syntactic sugar:
+    \begin{itemize}
+\item \brac{symbol}?: \brac{symbol} can occur 0 or 1 times;
+\item \brac{symbol}+: \brac{symbol} can occur 1 or more times;
+\item \brac{symbol}*: \brac{symbol} can occur 0 or more times;
+\item parentheses can be used with these shortcuts, e.g. (\brac{s1}\brac{s2})+
+    \end{itemize}
+~\\
+    Instead of
+\begin{python}
+  "<identifier>": ["<idchar>", "<identifier><idchar>"],
+\end{python}
+just write
+\begin{python}
+  "<identifier>": ["<idchar>+"],
+\end{python}
+Function \texttt{convert\_ebnf\_grammar()} (in \texttt{code/L09/ebnf.py}) translates EBNF to BNF.
+    
+\end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Opts (for future expansion)}
+  \begin{changemargin}{2em}
+    \Large
+\begin{python}
+"<expr>":
+        [("<term> + <expr>", opts(min_depth=10)),
+         ("<term> - <expr>", opts(max_depth=2)),
+          "<term>"]
+\end{python}
+~\\
+and there are functions like \texttt{opts()}, \texttt{exp\_string()}, \texttt{exp\_opt()}, \texttt{exp\_opts()},
+\texttt{set\_opts()} in \texttt{code/L09/opts.py}.
+\end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Grammar Utilities}
+  \Large
+  found in \texttt{code/L09/grammars.py}:
+  \begin{changemargin}{2em}
+    \texttt{trim\_grammar()}: remove unneeded expansions;\\[1em]
+    \texttt{is\_valid\_grammar()}: validity checks,\\ e.g. no unreachable symbols, etc
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Applications of Grammars in Testing}
+  \large
+  \begin{changemargin}{2em}
+    \begin{itemize}
+    \item Earliest known: Burkhardt, 1967: ``Generating test programs from syntax.''
+    \item CSmith: grammar-based fuzzing; they work hard to only generate valid C programs;
+      pseudo-oracle comparing GCC and LLVM.
+    \item EMI: fuzz dead code, observe mis-compilations.
+    \item LangFuzz: grammar-based fuzzing on test suites.
+    \item Grammarinator: open-source grammar fuzzer in Python.
+    \item Domato: fuzzes Document Object Model inputs.
+    \end{itemize}
+
   \end{changemargin}
 \end{frame}
 
