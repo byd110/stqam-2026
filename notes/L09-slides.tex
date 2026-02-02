@@ -119,7 +119,7 @@ Uses:
 \item check if a number is valid
 \item \alert{generate} numbers of the right shape
 \end{itemize}
-But: also must satisfy checksum rules!
+(But: also must satisfy checksum rules!)
   \end{changemargin}
 \end{frame}
 
@@ -210,7 +210,8 @@ But: also must satisfy checksum rules!
         |   5 | 6 | 7 | 8 | 9
 \end{verbatim}
 ~\\
-(Could be expressed as a regexp).
+(Could be expressed as a regexp).\\[1em]
+Note: \brac{xxx} represents nonterminal \texttt{xxx}.
   \end{changemargin}
 \end{frame}
 
@@ -294,7 +295,7 @@ DIGIT_GRAMMAR = {
 \end{python}
 
 Nonterminals in  \brac{brackets}.\\
-All else taken as terminals.\\[1em]
+Rest of the string interpreted as terminals.\\[1em]
   \end{changemargin}
 \end{frame}
 
@@ -363,7 +364,7 @@ True
 START_SYMBOL = "<start>"
     \end{python}
 
-    Non-terminals always in \brac{brackets}:
+    Because non-terminals always in \brac{brackets}:
     \begin{python}
 import re
 RE_NONTERMINAL = re.compile(r'(<[^<> ]*>)')
@@ -449,9 +450,30 @@ def simple_grammar_fuzzer(grammar: Grammar,
     \item takes a string, finds a nonterminal, replaces with an alternative.
     \item it's all string replacement.
     \item tree manipulations would be better; stay tuned.
-      \item there are some limits to help w/termination.
     \end{itemize}
   \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Termination for Simple Grammar Fuzzer}
+
+  \Large
+  \begin{changemargin}{1em}
+    Let's look at this more closely:
+  \end{changemargin}
+  \begin{python}
+    if len(nonterminals(new_term)) < max_nonterminals:
+        term = new_term
+        expansion_trials = 0
+    else:
+        expansion_trials += 1
+        if expansion_trials >= max_expansion_trials:
+            raise ExpansionError("Cannot expand " + repr(term))
+
+  return term
+  \end{python}
+  If too many nonterminals after substitution:\\
+  \qquad give up on generated string, re-choose.
 \end{frame}
 
 \begin{frame}[fragile]
@@ -724,18 +746,55 @@ does indeed raise a \texttt{TimeoutError}.\\[1em]
 
   \Large
   \begin{changemargin}{2em}
-Rule for \brac{factor} has RHS:
+Rule for \brac{factor}:
+  \end{changemargin}
 \begin{python}
-['<sign-1><factor>', '(<expr>)', '<integer><symbol-1>']
+  '<factor>':
+    ['<sign-1><factor>', '(<expr>)', '<integer><symbol-1>']
 \end{python}
+\end{frame}
 
+\begin{frame}[fragile]
+  \frametitle{Termination for Simple Grammar Fuzzer}
+
+  \Large
+  \begin{changemargin}{1em}
+    Let's look at this more closely:
+  \end{changemargin}
+  \begin{python}
+    if len(nonterminals(new_term)) < max_nonterminals:
+        term = new_term
+        expansion_trials = 0
+    else:
+        expansion_trials += 1
+        if expansion_trials >= max_expansion_trials:
+            raise ExpansionError("Cannot expand " + repr(term))
+
+  return term
+  \end{python}
+  If too many nonterminals after substitution:\\
+  \qquad give up on generated string, re-choose.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{\texttt{simple\_grammar\_fuzzer} fails}
+
+  \Large
+  \begin{changemargin}{2em}
 \texttt{simple\_grammar\_fuzzer()} throws away generated
 strings with $> 3$ nonterminals.\\[1em]
 
-Only allowed alternative for \brac{factor} is
-\texttt{'(\brac{expr})'}.\\[1em]
+  \end{changemargin}
+\begin{python}
+  '<factor>':
+    ['<sign-1><factor>', '(<expr>)', '<integer><symbol-1>']
+\end{python}
 
-Other alternatives add a non-terminal,
+  \begin{changemargin}{2em}
+  So, only allowed alternative for \brac{factor} is
+\texttt{'(\brac{expr})'}\ldots\\[1em]
+
+\ldots other alternatives add a non-terminal,
 so the fuzzer won't.
   \end{changemargin}
 \end{frame}
@@ -786,9 +845,9 @@ so the fuzzer won't.
 
 \begin{center}
 \begin{tikzpicture}[node distance=1.3cm]
-  \node[bt] (s)               {\brac{start}};
+  \node[bt,text width=2cm] (s)               {\brac{start}};
   \node[bt] (e0) [below of=s] {\brac{expr}};
-  \node[bt,text width=1cm] (+) [below of=e0] {+};
+  \node[bt,text width=1cm,fill=green!20] (+) [below of=e0] {+};
   \node[bt] (t) [left of=+,xshift=-1cm] {\brac{term}};
   \node[bt] (e1) [right of=+,xshift=1cm] {\brac{expr}};
 
@@ -801,5 +860,536 @@ so the fuzzer won't.
 
 \end{frame}
 
+\begin{frame}[fragile]
+  \frametitle{Starting at the start}
+
+\begin{center}
+\begin{tikzpicture}[node distance=1.3cm]
+  \node[bt,text width=2cm] (s)               {\brac{start}};
+\end{tikzpicture}
+\end{center}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Derivation: \brac{start} $\rightarrow$ \brac{expr}}
+
+\begin{center}
+\begin{tikzpicture}[node distance=1.3cm]
+  \node[bt,text width=2cm] (s)               {\brac{start}};
+  \node[bt] (e0) [below of=s] {\brac{expr}};
+  \path[->] (s) edge node {} (e0);
+\end{tikzpicture}
+\end{center}
+\begin{changemargin}{2cm}
+Search for nonterminal $S$ without children;\\
+here, \brac{start}. Replace with its child \brac{expr}.
+\end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Derivation: \brac{expr} $\rightarrow \brac{term} + \brac{expr}$}
+
+\begin{center}
+\begin{tikzpicture}[node distance=1.3cm]
+  \node[bt,text width=2cm] (s)               {\brac{start}};
+  \node[bt] (e0) [below of=s] {\brac{expr}};
+  \node[bt,text width=1cm,fill=green!20] (+) [below of=e0] {+};
+  \node[bt] (t) [left of=+,xshift=-1cm] {\brac{term}};
+  \node[bt] (e1) [right of=+,xshift=1cm] {\brac{expr}};
+
+  \path[->] (s) edge node {} (e0);
+  \path[->] (e0) edge node {} (t);
+  \path[->] (e0) edge node {} (+);
+  \path[->] (e0) edge node {} (e1);
+\end{tikzpicture}
+\end{center}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Down to terminals}
+
+  \begin{center}
+\scalebox{0.8}{
+\begin{tikzpicture}[node distance=1.3cm]
+  \node[bt,text width=2cm] (s)               {\brac{start}};
+  \node[bt] (e0) [below of=s] {\brac{expr}};
+  \node[bt,text width=1cm,fill=green!20] (+) [below of=e0] {+};
+  \node[bt] (t0) [left of=+,xshift=-1cm] {\brac{term}};
+  \node[bt,text width=2cm] (f0) [below of=t0] {\brac{factor}};
+  \node[bt,text width=2.5cm] (i0) [below of=f0] {\brac{integer}};
+  \node[bt,text width=2.5cm] (d0) [below of=i0] {\brac{digit}};
+  \node[bt,fill=green!20] (cd0) [below of=d0] {\brac{2}};
+  \node[bt] (e1) [right of=+,xshift=1cm] {\brac{expr}};
+  \node[bt] (t1) [below of=e1] {\brac{term}};
+  \node[bt,text width=2cm] (f1) [below of=t1] {\brac{factor}};
+  \node[bt,text width=2.5cm] (i1) [below of=f1] {\brac{integer}};
+  \node[bt,text width=2.5cm] (d1) [below of=i1] {\brac{digit}};
+  \node[bt,fill=green!20] (cd1) [below of=d1] {\brac{3}};
+
+  \path[->] (s) edge node {} (e0);
+  \path[->] (e0) edge node {} (t0);
+  \path[->] (t0) edge node {} (f0);
+  \path[->] (f0) edge node {} (i0);
+  \path[->] (i0) edge node {} (d0);
+  \path[->] (d0) edge node {} (cd0);
+  \path[->] (e0) edge node {} (+);
+  \path[->] (e0) edge node {} (e1);
+  \path[->] (e1) edge node {} (t1);
+  \path[->] (t1) edge node {} (f1);
+  \path[->] (f1) edge node {} (i1);
+  \path[->] (i1) edge node {} (d1);
+  \path[->] (d1) edge node {} (cd1);
+\end{tikzpicture}
+}
+\end{center}
+\end{frame}
+
+\usebackgroundtemplate{\tikz\node[opacity=0.2]{\includegraphics[width=\paperwidth]{L09/04643_leading_tree_v1.jpg}};}
+\begin{frame}[fragile]
+  \Huge
+\begin{center}
+  Derivation Trees in Python
+\end{center}
+\end{frame}
+
+\usebackgroundtemplate{}
+
+\begin{frame}[fragile]
+  \Large
+  \frametitle{Representing derivation trees}
+  \begin{changemargin}{2cm}
+  \begin{python}
+    (SYMBOL_NAME, CHILDREN)
+  \end{python}
+  ~\\
+  SYMBOL\_NAME: e.g. \brac{start}, \texttt{+}\\
+  (again, nonterminals in \brac{brackets})\\[1em]
+  CHILDREN: the subtree at that node\\[1em]
+  \begin{python}
+DerivationTree = Tuple[str, Optional[List[Any]]]
+  \end{python}
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \Large
+  \frametitle{Example Derivation Tree}
+  \begin{changemargin}{2cm}
+\begin{python}
+derivation_tree: DerivationTree = ("<start>",
+                   [("<expr>",
+                     [("<expr>", None),
+                      (" + ", []),
+                         ("<term>", None)]
+                     )])
+\end{python}
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \Large
+  \frametitle{Allowed CHILDREN}
+  \begin{changemargin}{2cm}
+    \begin{itemize}
+      \item the subtree
+      \item None: this is a nonterminal still to be expanded
+      \item {} []: this node is a terminal
+    \end{itemize}
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \Large
+  \frametitle{GrammarFuzzer Implementation}
+  \begin{changemargin}{2cm}
+\begin{python}
+class GrammarFuzzer(Fuzzer):
+"""Produce strings from grammars efficiently,
+       using derivation trees."""
+
+  def __init__(self,
+               grammar: Grammar,
+               start_symbol: str = START_SYMBOL,
+               min_nonterminals: int = 0,
+               max_nonterminals: int = 10,
+               disp: bool = False,
+               log: Union[bool, int] = False)
+               -> None:
+      # ...
+\end{python}
+For now, only use \texttt{grammar} and \texttt{start\_symbol}.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \Large
+  \frametitle{Partial check for grammar validity}
+\begin{python}
+      def check_grammar(self) -> None:
+        assert self.start_symbol in self.grammar
+        # recall: e.g. every nonterminal is reachable etc
+        assert is_valid_grammar(
+            self.grammar,
+            start_symbol=self.start_symbol,
+            supported_opts=self.supported_opts())
+\end{python}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \Large
+  \frametitle{Tree manipulations}
+  \begin{changemargin}{1cm}
+    Better than string manipulations.\\[1em]
+    We want to expand nonterminals (selectively).\\[1em]
+
+    Alternatives in grammars still expressed as strings, e.g.
+\begin{python}
+"<expr>":
+        [("<term> + <expr>"),
+         ("<term> - <expr>"),
+          "<term>"]
+\end{python}
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \Large
+  \frametitle{Strings to trees}
+  \begin{changemargin}{1cm}
+\begin{python}
+def expansion_to_children(expansion: Expansion) ->
+           List[DerivationTree]:
+  expansion = exp_string(expansion)
+  assert isinstance(expansion, str)
+
+  if expansion == "":
+      return [("", [])]
+
+  strings = re.split(RE_NONTERMINAL, expansion)
+  return [(s, None) if is_nonterminal(s) else (s, [])
+          for s in strings if len(s) > 0]
+
+>>> expansion_to_children([("<term> + <expr>")])
+[('<term>', None), (' + ', []), ('<expr>', None)]
+\end{python}
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Expanding a node}
+
+  \begin{center}
+\begin{tikzpicture}[node distance=1.3cm]
+  \node[bt] (e0) [below of=s] {\brac{expr}};
+  \node[bt,text width=1cm,fill=green!20] (+) [below of=e0] {+};
+  \node[bt] (t) [left of=+,xshift=-1cm] {\brac{term}};
+  \node[bt] (e1) [right of=+,xshift=1cm] {\brac{expr}};
+
+  \path[->] (e0) edge node {} (t);
+  \path[->] (e0) edge node {} (+);
+  \path[->] (e0) edge node {} (e1);
+\end{tikzpicture}
+  \end{center}
+  \begin{changemargin}{2cm}
+    Key operation: expand nonterminal into one of its alternatives;
+    here we have chosen +, but could also be - or a term.\\[1em]
+    We replaced \brac{expr} with e.g. $\brac{term} + \brac{expr}$.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Randomly choosing an alternative}
+\large
+\begin{changemargin}{1cm}
+  Same choice strategy as \texttt{simple\_grammar\_fuzzer}.
+\end{changemargin}
+\begin{python}
+def choose_node_expansion(self, node: DerivationTree,
+     children_alternatives: List[List[DerivationTree]]) -> int:
+  return random.randrange(0, len(children_alternatives))
+\end{python}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Random expansion implementation}
+  \Large
+\begin{changemargin}{1cm}
+  For a subtree with non-expanded non-terminal at root
+  (\texttt{children} == \texttt{None}):
+  \begin{itemize}
+\item  expand non-terminal into one of its alternatives (randomly chosen),
+\item  return the tree.
+  \end{itemize}
+\end{changemargin}
+
+\begin{python}
+def expand_node_randomly(self, node: DerivationTree) -> DerivationTree:
+  (symbol, children) = node
+  assert children is None
+
+  # Fetch & parse possible expansions from grammar...
+  expansions = self.grammar[symbol]
+  children_alternatives: List[List[DerivationTree]] = [
+      self.expansion_to_children(expansion) for expansion in expansions
+  ]
+\end{python}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Random expansion implementation 2}
+  \large
+\begin{python}
+  # ... and select a random expansion
+  index = self.choose_node_expansion(node, children_alternatives)
+  chosen_children = children_alternatives[index]
+
+  # Return with new children
+  return (symbol, chosen_children)
+\end{python}
+
+\begin{changemargin}{2cm}
+\texttt{expand\_node\_*} return a fresh \texttt{DerivationTree},
+consistent with functional programming style.\\[1em]
+
+Randomly is for now our only strategy;
+we will later redefine \texttt{expand\_node} 
+to use other strategies.
+\end{changemargin}
+\begin{python}
+    def expand_node(self, node: DerivationTree) -> DerivationTree:
+        return self.expand_node_randomly(node)
+\end{python}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{\texttt{expand\_node} in action}
+
+\begin{python}
+>>> f = GrammarFuzzer(EXPR_GRAMMAR, log=True)
+
+>>> print("Before expand_node_randomly():")
+>>> expr_tree = ("<integer>", None)
+>>> print (expr_tree)
+('<integer>', None)
+
+>>> expr_tree = f.expand_node_randomly(expr_tree)
+>>> print("After expand_node_randomly():")
+>>> print (expr_tree)
+('<integer>', [('<digit>', None), ('<integer>', None)])
+\end{python}
+or also possible:
+\begin{python}
+>>> print (expr_tree)
+('<integer>', [('<digit>', None)])
+\end{python}
+
+\begin{changemargin}{2cm}
+\texttt{expand\_node\_*} return a fresh \texttt{DerivationTree},
+consistent with functional programming style.\\[1em]
+
+Randomly is for now our only strategy;
+we will later redefine \texttt{expand\_node} 
+to use other strategies.
+\end{changemargin}
+\begin{python}
+    def expand_node(self, node: DerivationTree) -> DerivationTree:
+        return self.expand_node_randomly(node)
+\end{python}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Picking a node to expand}
+
+  \Large
+  \begin{changemargin}{1cm}
+    \texttt{expand\_node()}: return expanded current node.\\[1em]
+    \texttt{expand\_tree\_once()}: modify the tree; pick some node and call \texttt{expand\_node()} on that.\\[1em]
+    Specifically: if root is unexpanded, expand that.\\
+    Otherwise, find a random descendant and expand that.\\[1em]
+    NB: uses the current definition of \texttt{self.expand\_node}, which can change.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{\texttt{expand\_tree\_once()} example}
+  \begin{python}
+>>> f.expand_node = f.expand_node_randomly
+>>> derivation_tree = ("<start>",
+                        [("<expr>",
+                          [("<expr>", None), (" + ", []),
+                           ("<term>", None)])])
+>>> print (derivation_tree)
+('<start>', [('<expr>', [('<expr>', None), (' + ', []), 
+             ('<term>', None)])])
+>>> f.expand_tree_once(derivation_tree)
+Expanding <term> randomly
+>>> f.expand_tree_once(derivation_tree)
+Expanding <expr> randomly
+>>> print (derivation_tree)
+('<start>', [('<expr>', [('<expr>', [('<term>', None), 
+   (' + ', []), ('<expr>', None)]), (' + ', []),
+    ('<term>', [('<factor>', None), (' / ', []),
+    ('<term>', None)])])])
+\end{python}
+\end{frame}
+
+\usebackgroundtemplate{\tikz\node[opacity=0.2]{\includegraphics[width=\paperwidth]{L09/20230820_215122777_closed.jpg}};}
+\begin{frame}[fragile]
+  ~\\[1em]
+ \hspace*{2em}
+         {\Huge Idea 1: Closing the Tree}
+         \\[1em]
+         \hspace*{2em} {\large credit: Sean Luke, 2000.}
+\end{frame}
+\usebackgroundtemplate{}
+
+\begin{frame}[fragile]
+  \frametitle{How to close the tree?}
+
+  \Large
+  \begin{changemargin}{1cm}
+    Once our tree is big enough,\\
+    choose expansions that increase tree size least.\\[1em]
+    e.g. \brac{factor} could be\\
+    \qquad $\brac{integer}(.\brac{integer})?$,\\
+    which could be \brac{integer}, \\
+    which could be a single \brac{digit}.\\[1em]
+    (Other alternatives are higher-cost).
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Choosing the minimum-cost expansion}
+
+  \Large
+  \begin{changemargin}{1cm}
+    Traverse the tree \& sum the minima.
+  \end{changemargin}
+\begin{python}
+def symbol_cost(self, symbol: str, seen: Set[str] = set()) -> Union[int, float]:
+    expansions = self.grammar[symbol]
+    return min(self.expansion_cost(e, seen | {symbol}) for e in expansions)
+
+def expansion_cost(self, expansion: Expansion,
+                   seen: Set[str] = set()) -> Union[int, float]:
+    symbols = nonterminals(expansion)
+    if len(symbols) == 0:
+        return 1  
+
+    if any(s in seen for s in symbols):
+        return float('inf')
+
+    return sum(self.symbol_cost(s, seen) for s in symbols) + 1
+\end{python}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Minimum-cost expansion commentary}
+
+  \Large
+\begin{python}
+def symbol_cost(self, symbol: str, seen: Set[str] = set()) -> Union[int, float]:
+\end{python}
+  \begin{changemargin}{1cm}
+    is the minimum cost of the children of \texttt{symbol}.
+  \end{changemargin}
+~\\
+\begin{python}
+def expansion_cost(self, expansion: Expansion,
+        seen: Set[str] = set()) -> Union[int, float]:
+\end{python}
+\begin{changemargin}{1cm}
+  if \texttt{expansion} has no nonterminals, return 1;\\
+  if any nonterminal in \texttt{expansion} is in \texttt{seen}, return inf;\\
+  else, return 1 + $\sum$ \texttt{symbol\_cost}(children).
+\end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Minimum-cost expansion examples}
+
+  \Large
+\begin{changemargin}{1cm}
+\begin{python}
+>>> f = GrammarFuzzer(EXPR_GRAMMAR)
+>>> f.symbol_cost("<digit>")
+1
+>>> f.symbol_cost("<expr>")
+5
+\end{python}
+\end{changemargin}
+\begin{changemargin}{2cm}
+  The min cost of \brac{expr} is 5, through \brac{term}, \brac{factor}, \brac{integer}, \brac{digit}, and 1.
+\end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Beyond random: parametrizing by algorithm}
+
+  \Large
+\begin{changemargin}{1cm}
+\begin{python}
+def expand_node_by_cost(self, node: DerivationTree, 
+                       choose: Callable = min)
+    -> DerivationTree:
+\end{python}
+\end{changemargin}
+
+\begin{changemargin}{1.5cm}
+  This functional-style method:
+  \begin{itemize}
+  \item collects min cost of alternatives;
+  \item asks \texttt{choose} to choose a desired cost;
+  \item collects all alternatives with chosen cost;
+  \item uses \texttt{choose\_node\_expansion()} to choose an alternative\\
+    (default: random);
+  \item returns chosen alternative.
+  \end{itemize}
+\end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Using \texttt{min} as choice algorithm}
+
+  \Large
+\begin{changemargin}{1cm}
+\begin{python}
+def expand_node_min_cost(self, node: DerivationTree) -> DerivationTree:
+    return self.expand_node_by_cost(node, min)
+\end{python}
+and using it:
+\begin{python}
+>>> f.expand_node = f.expand_node_min_cost
+>>> while f.any_possible_expansions(derivation_tree):
+     derivation_tree = f.expand_tree_once(derivation_tree)
+Expanding <term> at minimum cost
+Expanding <factor> at minimum cost
+Expanding <term> at minimum cost
+... etc ...
+>>> print (all_terminals(derivation_tree))
+5 + 5 + 6 / 1
+\end{python}
+\end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Why closing works}
+  \Large
+  \begin{changemargin}{2cm}
+    \begin{itemize}
+    \item \texttt{expand\_node\_min\_cost()} does not increase the number of symbols,
+    \item so all open expansions are eventually closed.
+    \end{itemize}~\\
+    I think this is a property of the grammar as well as the implementation.
+  \end{changemargin}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Node Inflation}
+  To Be Continued
+\end{frame}
 
 \end{document}

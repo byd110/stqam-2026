@@ -576,7 +576,7 @@ We can continue the expansion process. Nonterminal \brac{expr} can expand to $\b
 \begin{tikzpicture}[node distance=1.3cm]
   \node[bt] (s)               {\brac{start}};
   \node[bt] (e0) [below of=s] {\brac{expr}};
-  \node[bt,text width=1cm] (+) [below of=e0] {+};
+  \node[bt,text width=1cm,fill=green!20] (+) [below of=e0] {+};
   \node[bt] (t) [left of=+,xshift=-1cm] {\brac{term}};
   \node[bt] (e1) [right of=+,xshift=1cm] {\brac{expr}};
 
@@ -680,7 +680,6 @@ in the form of \texttt{disp} and \texttt{log}. The constructor calls \texttt{che
 which ensures some validity properties:
 \begin{python}
       def check_grammar(self) -> None:
-        """Check the grammar passed"""
         assert self.start_symbol in self.grammar
         assert is_valid_grammar(
             self.grammar,
@@ -691,11 +690,11 @@ We didn't talk about \texttt{is\_valid\_grammar}, but it checks that all nonterm
 from either \brac{start} or the start symbol that it is given.
 
 \paragraph{Tree manipulation: expanding a node.} One of the central operations that we need to be able to perform
-on a derivation tree is to randomly expand a nonterminal into one of its alternatives; for instance, an \brac{expr}
+on a derivation tree is to expand a nonterminal into one of its alternatives (randomly-chosen); for instance, an \brac{expr}
 can be an addition, subtraction, or just a term, and we need to replace the \brac{expr} with, for instance,
 $\brac{term} + \brac{expr}$.
 
-Which alternative? We'll start by randomly choosing an alternative. But we'll want to use different strategies in the future.
+Which alternative? We'll start by randomly choosing an alternative (same as \texttt{simple\_grammar\_fuzzer}. But we'll want to use different strategies in the future.
 \begin{python}
     def choose_node_expansion(self, node: DerivationTree,
                               children_alternatives: List[List[DerivationTree]]) -> int:
@@ -892,7 +891,7 @@ and we can use that to get a sequence of expansions:
 \begin{python}
     f.expand_node = f.expand_node_min_cost
     while f.any_possible_expansions(derivation_tree):
-        derivation_tree = f.expand_tree_once(derivation_tree)    
+        derivation_tree = f.expand_tree_once(derivation_tree)
     print (derivation_tree)
     print (all_terminals(derivation_tree))
 \end{python}
