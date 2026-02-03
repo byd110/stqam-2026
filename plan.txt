@@ -27,19 +27,19 @@ https://docs.gitlab.com/user/application_security/sast/evaluation_guide/
 ** L07 intro to fuzzing / address sanitizer -> 70 minutes
 ** L08 mutation-based fuzzing -> exactly 80 minutes
       but also add https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-__ L09 grammar-based fuzzing
+** L09 grammar-based fuzzing
       https://www.fuzzingbook.org/html/Grammars.html
       https://www.fuzzingbook.org/html/GrammarFuzzer.html
+__ L10
       https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
       https://www.fuzzingbook.org/html/GeneratorGrammarFuzzer.html
       https://lcamtuf.blogspot.com/2015/01/afl-fuzz-making-up-grammar-with.html
-__ L10 fuzzing APIs (https://www.fuzzingbook.org/html/APIFuzzer.html)
+      https://www.fuzzingbook.org/html/APIFuzzer.html
 __ L11 constraint-based fuzzing / property based testing / automatic test generation
-__ L12 reducing failure-inducing inputs (https://www.fuzzingbook.org/html/Reducer.html)
       https://www.fuzzingbook.org/html/FuzzingWithConstraints.html
       https://increment.com/testing/in-praise-of-property-based-testing/
-      https://model-checking.github.io/kani-verifier-blog/2022/10/27/using-kani-with-the-bolero-property-testing-framework.html
-      https://crates.io/crates/proptest
+__ L12 reducing failure-inducing inputs 
+      https://www.fuzzingbook.org/html/Reducer.html
 
 - test generation / assertions 
 - invariant inference: https://www.fuzzingbook.org/html/DynamicInvariants.html
@@ -75,6 +75,8 @@ https://aws.amazon.com/blogs/opensource/how-open-source-projects-are-using-kani-
 * L14 L07 from W25
 * L15 CBMC/CPROVER, bounded model checking for C, and loop unwinding; verifying Rust with Kani: proof harnesses, contracts, and unsafe Rust
 could also talk about this: https://model-checking.github.io/kani-verifier-blog/2023/08/31/using-kani-to-validate-security-boundaries-in-aws-firecracker.html
+      https://model-checking.github.io/kani-verifier-blog/2022/10/27/using-kani-with-the-bolero-property-testing-framework.html
+      https://crates.io/crates/proptest
 
 assignment questions: https://doina.net/AR15/AR15-L6.pdf
 
