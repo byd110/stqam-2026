@@ -268,7 +268,17 @@ to model-based specification, except that there is a finite state machine
 which describes the overall system state. Wikipedia provides the turnstile example\footnote{By Chetvorno - Own work, CC0, \url{https://commons.wikimedia.org/w/index.php?curid=20269475}}:
 
 \begin{center}
-  \includegraphics[width=.5\textwidth]{L05/Turnstile_state_machine_colored.png}
+\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=2.5cm,
+                    semithick,initial text=]
+
+  \node[initial,ellipse,draw]   (A)              {\texttt{LOCKED}};
+  \node[ellipse,draw]           (B) [right of=A,xshift=3em] {\texttt{UNLOCKED}};
+  
+  \path (A) edge[bend left]              node[right,yshift=.5em] {\texttt{coin}} (B)
+        (B) edge[bend left]              node[left,yshift=-.5em] {\texttt{push}} (A)
+        (A) edge[loop above,min distance=5mm]              node {\texttt{push}} (A)
+        (B) edge[loop below,min distance=5mm]              node {\texttt{coin}} (B);
+\end{tikzpicture}
 \end{center}
 
 One can use the FSM as a test oracle; inserting a coin in a locked turnstile
