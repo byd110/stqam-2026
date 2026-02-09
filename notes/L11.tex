@@ -75,7 +75,7 @@ do, else, case, break},
 
 \begin{document}
 
-\lecture{11 --- February 9, 2026}{Winter 2026}{Patrick Lam}{version 0}
+\lecture{11 --- February 9, 2026}{Winter 2026}{Patrick Lam}{version 1}
 
 I write scientific content in \LaTeX, which is somewhat
 user-unfriendly.  If one posts in the relevant StackExchange with a
@@ -115,7 +115,7 @@ class MysteryRunner(Runner):
 \end{python}
 
 This \texttt{Runner} fails on some inputs. At this point, we have a number of fuzzing techniques
-at our disposal, but we can use plain old \texttt{RandomFuzzer} to find the failure.
+at our disposal, but we can use plain old \texttt{RandomFuzzer} to find a failure.
 
 \begin{python}
 def fuzz_mystery_runner():
@@ -129,7 +129,7 @@ def fuzz_mystery_runner():
     print (result)
 \end{python}
 
-OK, so we do that. It works---or fails, actually.
+OK, so we do that. It works---or fails, actually. (I tried it manually and it took 6 tries to get a failing input.)
 \begin{verbatim}
 $ python3 mystery_runner.py
 (%*50  1)-&7,;49:4?%:43*(-.
@@ -166,12 +166,12 @@ Let's try the same trick again, on the first half.
 (' 1)-&7,', 'PASS')
 >>> second_quarter = first_half[:quarter_length]
 >>> mystery.run(second_quarter)
-(' 1)-&7,', 'PASS')
+('(%*50 ', 'PASS')
 \end{python}
 Halving doesn't quite work this time. We need both the first quarter
 and the second quarter to trigger the failure---looking at the code,
-it's looking for two characters, but the characters don't have to be
-in the same half.
+it's looking for two characters, but the characters aren't in the
+same quarter in our test case.
 
 \section*{Delta Debugging}
 There are other ways to do binary searches. What we tried above was
