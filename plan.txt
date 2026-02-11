@@ -29,15 +29,15 @@ https://docs.gitlab.com/user/application_security/sast/evaluation_guide/
       but also add https://www.fuzzingbook.org/html/GreyboxFuzzer.html
       https://lcamtuf.blogspot.com/2015/01/afl-fuzz-making-up-grammar-with.html
       https://lcamtuf.blogspot.com/2015/04/finding-bugs-in-sqlite-easy-way.html
+      mentioned afl-cmin, afl-tmin
 ** L09 grammar-based fuzzing [with about 20 slides leftover]
       https://www.fuzzingbook.org/html/Grammars.html
       https://www.fuzzingbook.org/html/GrammarFuzzer.html
 ** L10 configuration fuzzing
       https://www.fuzzingbook.org/html/ConfigurationFuzzer.html
 
-__ L11 reducing failure-inducing inputs 
+** L11 reducing failure-inducing inputs 
       https://www.fuzzingbook.org/html/Reducer.html
-      afl-cmin, afl-tmin
 
 if time permits:
       https://www.fuzzingbook.org/html/APIFuzzer.html
