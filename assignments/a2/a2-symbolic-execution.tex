@@ -3,30 +3,30 @@
 
 Consider the following program \texttt{Prog1}:
 
-\begin{lstlisting}[numbers=left,language=While]
-havoc x, y;
-if x + y > 15 then {
-  x = x + 7;
-  y = y - 12 }
-else {
-  y = y + 10;
-  x = x - 2 };
+\begin{lstlisting}[numbers=left,language=Python]
+havoc (x, y)
+if x + y > 15:
+  x = x + 7
+  y = y - 12
+else:
+  y = y + 10
+  x = x - 2
 
-x = x + 2;
+x = x + 2
 
-if 2 * (x + y) > 21 then {
-  x = x * 3;
-  y = y * 2 }
-else {
-  x = x * 4;
-  y = y * 3 + x };
-skip
+if 2 * (x + y) > 21:
+  x = x * 3
+  y = y * 2
+else:
+  x = x * 4
+  y = y * 3 + x
+pass
 \end{lstlisting}
 \begin{enumerate}[label=(\alph*)]
-  \item (3) How many execution paths does \texttt{Prog1} have? List
+  \item (3 points) How many execution paths does \texttt{Prog1} have? List
     all the paths as a sequence of line numbers taken on the path.
 
-  \item (4) Symbolically execute each path and provide the resulting
+  \item (4 points) Symbolically execute each path and provide the resulting
     path condition. Show the steps of symbolic execution as
     a table. An example of executing the first line is given below:\\
     \begin{center}
@@ -42,7 +42,7 @@ skip
     \end{center}
 
 
-  \item (3) For each path in part (b), indicate whether it is
+  \item (3 points) For each path in part (b), indicate whether it is
     feasible or not. For each feasible path, give values for $X_0$ and
     $Y_0$ that satisfy the path condition.
 

@@ -1,0 +1,24 @@
+The Hypothesis library supports generating Python \texttt{decimals} and \texttt{fractions}.
+Use the equality operator == for all comparisons in this question.
+\begin{enumerate}[label=(\alph*)]
+\item (6 points) Write property-based tests for the three tests
+in \texttt{a2-property-based-testing/decimals.py}; they check
+that $d = -(-d)$; $d + 0 = 0$; and $d_1 + d_2 = d_2 + d_1$. You need to add a
+\texttt{@given} annotation to make these functions into Hypothesis tests,
+and you'll need to use \texttt{.normalize()} on the \texttt{Decimal}. You also
+want your tests to pass, so you'll need the right parameters at \texttt{@given}.
+\item (2 points) It turns out that + is not associative for \texttt{Decimal},
+  even when \texttt{NaN} and \texttt{inf} are excluded. Fill in the property-based test
+  in \texttt{failing\_decimals.py} that demonstrates this.
+\item (4 points) Moving on to fractions, fill in the implementations in
+  \texttt{fractions.py}, which check that $q + (-q) = 0$ and that $(q_1 + (q_2 + q_3)) = ((q_1 + q_2) + q_3)$.
+\item (3 points) Coming back full circle, write a composite Hypothesis strategy
+  that creates a \texttt{Decimal} similarly to the one in Question 1. However,
+  this time, for the integral part, concatenate (as strings) between 1 and 5 non-negative integers;
+  for the fractional part, concatenate between 0 and 3 non-negative integers; draw the
+  sign randomly; and construct the \texttt{Decimal} from these.
+
+  Then, write a property-based test that again checks whether add is associative for the
+  \texttt{Decimals} that you create with your strategy.
+\end{enumerate}
+
