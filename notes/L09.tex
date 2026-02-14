@@ -75,7 +75,7 @@ do, else, case, break},
 
 \begin{document}
 
-\lecture{9 --- February 2, 2026}{Winter 2026}{Patrick Lam}{version 1}
+\lecture{9 --- February 2, 2026}{Winter 2026}{Patrick Lam}{version 2}
 
 We said that there was mutation-based fuzzing and grammar-based fuzzing.
 Let's look at grammar-based fuzzing now.
@@ -908,7 +908,7 @@ of the grammar, in addition to the choice of node.
 \paragraph{Tree manipulation: node inflation.} We also want to have trees of at least a certain size, so that our
 programs have something to work with. We can easily look for the max-cost expansion using our machinery as well.
 \begin{python}
-    def expand_node_min_cost(self, node: DerivationTree) -> DerivationTree:
+    def expand_node_max_cost(self, node: DerivationTree) -> DerivationTree:
         if self.log:
             print("Expanding", all_terminals(node), "at maximum cost")
 
