@@ -1,6 +1,25 @@
-Give a grammar with a symbol with given symbol cost (easy to check)
+In the \texttt{a2-grammar-fuzzing} directory in your repo you'll find \texttt{symbol\_costs.py} and other files.
+\begin{enumerate}[label=(\alph*)]
+\item (2 points) Change the implementation of \texttt{grammar\_and\_symbol\_with\_cost\_7} so that it returns a grammar and symbol with symbol cost 7, when evaluated with empty \texttt{seen} set.
+\item (2 points) Change the implementation of \texttt{second\_grammar\_and\_symbol()}, \texttt{symbol\_cost\_with\_seen\_Z()}, as well as \texttt{symbol\_cost\_with\_seen\_Y()}, such that the \texttt{symbol\_cost()} of the returned symbol varies with different \texttt{seen} sets. The \texttt{seen} sets have to be sets that would get computed by an actual invocation to the \texttt{GrammarFuzzer}.
+\item (2 points) If you run \texttt{fuzz\_process\_numbers.py} as found in the repo (under \texttt{code/L10})
+  a bunch of times, you'll notice that the last number is pretty much always the longest number. 
+  How could you modify the provided \texttt{fuzz\_process\_numbers.py} to get more balanced number lengths?
+    % (don't set max-nonterminals)
+\item (14 points total) We'll now modify \texttt{GrammarFuzzer} in \texttt{a2-grammar-fuzzing/grammar\_fuzzer.py} to perhaps get more
+balanced number lengths (maybe?).
+\begin{enumerate}[label=(\roman*)]
+\item (4 of 14) I've provided a stub \texttt{descendants()} implementation.
+Write code that meets my specification: given \texttt{tree}, return a list of triples
+\texttt{(d, parent, index)} for each descendant in \texttt{tree}. Implementation hint: append direct children
+first, then recursively add descendants.
+\item (6 of 14) Modify \texttt{expand\_tree\_once} to use this new
+\texttt{descendants()} function instead of picking a direct child. (In some ways this simplifies the existing
+code a bit).
+\item (2 of 14) I've provided two test suites: \texttt{test\_descendants.py} and \texttt{test\_expand\_tree\_with\_descendants.py}. But, testing \texttt{expand\_tree} is tricky, because it randomly chooses a descendant. Modify the test case to be deterministic and to check the output of \texttt{expand\_tree\_once}.
+\item (2 of 14) Is it actually true that these modifications produce more balanced inputs? Make some sort of argument for or against and provide some evidence.
+\end{enumerate}
+\end{enumerate}
 
-two different symbol costs depending on seen
-
-Why do we get the long last numbers when we generate from process-numbers?
-Should we fix that?
+Parts (a) and (b) go into your repo; (c) is for Crowdmark; (d, i), (d, ii), and (d, iii) go into your repo; (d, iv)
+is for Crowdmark.
