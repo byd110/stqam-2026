@@ -23,7 +23,7 @@ class MutationCoverageFuzzer(MutationFuzzer):
 
     def reset(self) -> None:
         """Reset the initial population and seed index"""
-        self.population = self.seeds
+        self.population = []
         self.seed_index = 0
         self.coverages_seen: Set[frozenset] = set()
 
